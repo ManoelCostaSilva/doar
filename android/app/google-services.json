@@ -1,0 +1,105 @@
+{
+  "project_info": {
+    "project_number": "843261146395",
+    "project_id": "beleza-b3e97",
+    "storage_bucket": "beleza-b3e97.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843261146395:android:d5c175861202a133d2cfbe",
+        "android_client_info": {
+          "package_name": "br.com.mk.doar.doar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843261146395-hfl450ingl5on3knt348cd9roid6tfqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-nlcjF5up2_wcUnq0m3JdrzqO-N4u-pM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843261146395-hfl450ingl5on3knt348cd9roid6tfqq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843261146395:android:1109444785069f2fd2cfbe",
+        "android_client_info": {
+          "package_name": "br.com.mk.doar.user.doaruser"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843261146395-2fvdf51r8h7hvprqvhp96927pn52e76j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.mk.doar.user.doaruser",
+            "certificate_hash": "5e5a2b02a9da6126cf5c60787c0ce60e8957d17d"
+          }
+        },
+        {
+          "client_id": "843261146395-hfl450ingl5on3knt348cd9roid6tfqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-nlcjF5up2_wcUnq0m3JdrzqO-N4u-pM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843261146395-hfl450ingl5on3knt348cd9roid6tfqq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843261146395:android:6c07e4582b905a6ad2cfbe",
+        "android_client_info": {
+          "package_name": "br.com.mk.ticpay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843261146395-hfl450ingl5on3knt348cd9roid6tfqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-nlcjF5up2_wcUnq0m3JdrzqO-N4u-pM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843261146395-hfl450ingl5on3knt348cd9roid6tfqq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

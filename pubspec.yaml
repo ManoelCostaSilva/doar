@@ -1,0 +1,38 @@
+name: doaruser
+description: Doar usuário
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.3
+  firebase_core: ^1.3.0
+  firebase_storage: ^8.1.3
+  cloud_firestore: ^2.2.2
+  hexcolor: ^2.0.4
+  permission_handler: ^8.1.1
+  image_picker: ^0.8.0+3
+  flutter_launcher_icons: ^0.7.3
+  brasil_fields: ^1.1.3
+  get: ^4.1.4
+  get_storage: ^2.0.2
+  sn_progress_dialog: ^1.0.2
+  firebase_auth: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+  - images/camera_desligada.png
