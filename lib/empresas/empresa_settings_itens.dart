@@ -1,6 +1,8 @@
+import 'package:doaruser/user/user_login.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:doaruser/widget/texto.dart';
+import 'package:get_storage/get_storage.dart';
 
 class BtnLista extends StatefulWidget {
   var tit,destino,ID,dados,TB;
@@ -25,9 +27,12 @@ class BtnLista extends StatefulWidget {
 }
 
 class _BtnListaState extends State<BtnLista> with SingleTickerProviderStateMixin {
+  static final datacount = GetStorage();
+  var userId;
 
   @override
   void initState() {
+    userId=datacount.read('idUser');
     super.initState();
   }
 
@@ -47,11 +52,23 @@ class _BtnListaState extends State<BtnLista> with SingleTickerProviderStateMixin
                 IconButton(
                   color: widget.iconCor, icon: new Icon(widget.icon,),
                   onPressed: () {
-                    Get.toNamed(widget.destino,arguments: {'TB': widget.TB,'dados':widget.dados,
-                    'tit':widget.tit});
+                    if(widget.destino=='minhas_doacoes'){
+                      try{
+                        Get.toNamed(widget.destino,arguments: {'TB': widget.TB,'dados':widget.dados,
+                          'tit':widget.tit});
+                      } catch (e) {
+                        Get.to(() => LoginPage(), arguments: {'tipo':'minhas_doacoes'});
+                      }
+
+                    }else{
+                      Get.toNamed(widget.destino,arguments: {'TB': widget.TB,'dados':widget.dados,
+                        'tit':widget.tit});
+                    }
+
                   },
                 ),
                 Texto(tit:widget.tit,tam: widget.tam,cor:Colors.black,linhas: 2,),
+                SizedBox(height : 10.0),
               ]
           ),
         )

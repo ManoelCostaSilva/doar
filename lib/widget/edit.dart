@@ -55,7 +55,7 @@ class _EditState extends State<Edit> with SingleTickerProviderStateMixin {
         keyboardType: widget.input!=null?widget.input:null,
         inputFormatters: widget.mask==null?null:widget.mask1==null?[widget.mask]:[widget.mask,widget.mask1],
         style: TextStyle(color: cor,fontSize: widget.tamFont),
-        maxLines: widget.linhas==null?1:widget.linhas,
+        maxLines: widget.linhas,
         textAlign: widget.alinhamento==null?TextAlign.left:widget.alinhamento,
         onChanged: (String value) {
           Dados.setDadosParaGravaCliente(widget.campo, value);
@@ -83,7 +83,7 @@ class _EditState extends State<Edit> with SingleTickerProviderStateMixin {
 
         decoration: new InputDecoration(
             border: new OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.greenAccent, width: 10.0),
+              borderSide: BorderSide(color: Utils.corApp, width: 10.0),
               borderRadius: const BorderRadius.all(
                 const Radius.circular(10.0),
               ),

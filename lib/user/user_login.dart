@@ -1,5 +1,9 @@
 import 'package:brasil_fields/brasil_fields.dart';
+import 'package:doaruser/adm/adm_pedidos.dart';
 import 'package:doaruser/dados/dados.dart';
+import 'package:doaruser/doacao/minhas_doacoes.dart';
+import 'package:doaruser/user/user_anuncio.dart';
+import 'package:doaruser/user/user_localizacao.dart';
 import 'package:doaruser/user/user_termo.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/circular.dart';
@@ -21,6 +25,21 @@ class _LoginPageState extends State<LoginPage> {
   var celular = TextEditingController();
   static final datacount = GetStorage();
   bool mostraCircular=false;
+  var fones,tipo;
+
+  @override
+  void initState() {
+    super.initState();
+    try{
+      tipo =Get.arguments['tipo'] ?? null;
+    } catch (e) {
+      tipo='login';
+    }
+    Dados.campos.clear();
+    Dados.prepara(fones, 'fone',celular, true);
+    Dados.prepara(fones, 'local',celular, true);
+    Dados.prepara(fones, 'termo',celular, true);
+  }
 
   Future<void> verifyPhoneNumber(BuildContext context) async {
     if(celular.text==''){
@@ -37,12 +56,11 @@ class _LoginPageState extends State<LoginPage> {
     nroF='+55 '+nroF;
 
     await FirebaseAuth.instance.verifyPhoneNumber(
-      //phoneNumber: '+55 41 99999--7777',
       phoneNumber: nroF,
       timeout: Duration(milliseconds: 10000),
       verificationCompleted: (AuthCredential authCredential) {
         //GRAVA E VAI PRA PROXIMA PÁGINA
-        datacount.write('tipoUser','ADM');
+        simula();
       },
 
       verificationFailed: (FirebaseAuthException authException) {
@@ -74,9 +92,13 @@ class _LoginPageState extends State<LoginPage> {
           child:OutlinedButton(
             style: Utils.OutlinedButtonStlo(mostraCircular,0),
             child:mostraCircular?Circular():
-            Texto(tit:'enviar'.tr,negrito: true,tam: 20,cor:Colors.green,),
+            Texto(tit:'enviar'.tr,negrito: true,tam: 20,cor:Colors.white,),
             onPressed: () {
-              simula();
+              setState(() {
+                mostraCircular=true;
+              });
+              verifyPhoneNumber(context);
+              //simula();
             },
           ),
         ),
@@ -90,13 +112,18 @@ class _LoginPageState extends State<LoginPage> {
             ),
             Texto(tit:'autenticacao'.tr,cor: Utils.corApp,tam: 30,negrito: true,),
 
+            Padding(
+              padding: EdgeInsets.only(top: 20,bottom: 0,left:10,right: 10),
+              child:Texto(tit:'nao_conect'.tr,tam: 16,),
+            ),
+
             SizedBox(height: 80.0,),
 
             Texto(tit:'nro_cell'.tr,tam: 18,),
 
             Padding(
               padding: EdgeInsets.only(top: 10,bottom: 0,left:5,right: 5),
-              child: Edit(hint: '(99) 9 9999-9999',controle: celular,input: TextInputType.phone,
+              child: Edit(hint: '(99) 9 9999-9999',controle: celular,input: TextInputType.phone,campo: 'fone',
               icon: Icons.phone_iphone,corIcone: Utils.corApp,tamFont: 20,
                   mask: FilteringTextInputFormatter.digitsOnly, mask1: TelefoneInputFormatter()),),
           ],
@@ -104,25 +131,46 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
   void simula() async{
-    setState(() {
-      mostraCircular=true;
-      //verifyPhoneNumber(context);
-    });
+    if(celular.text==''){
+      Utils.snak('atencao'.tr, 'fone_inf'.tr, true, Colors.red);
+      return;
+    }
 
     var user=await Dados.getUserFone(celular.text);
+    datacount.write('foneUser',celular.text);
 
     if(user==null){
       await Dados.inserirUser(celular.text);
+      datacount.write('foneUser',celular.text);
+      datacount.write('termoOk','NAO');
+      datacount.write('local','NAO');
+      Get.offAll(() => UserTermo(), arguments: {'tipo':tipo});
     }else{
-      print('TEM');
+
+      datacount.write('idUser',user.id);
+      if(user['termo']!='Aceito'){
+        Get.offAll(() => UserTermo(), arguments: {'tipo':tipo});
+      }else{
+        datacount.write('termoOk','SIM');
+        if(user['ufId']==''){
+          Get.offAll(() => UserLocalizacao(), arguments: {'adm':true});
+        }else{
+          datacount.write('local','OK');
+          if(tipo=='doacao'){
+            datacount.write('foneUser',celular.text);
+            Get.offAll(() => AdmPedidos(), arguments: {'primeiraVez': false});
+          }else{
+            if(tipo=='minhas_doacoes'){
+              Get.offAll(() => MinhasDoacoes(), arguments: {'primeiraVez': false});
+            }else {
+              Get.offAll(() => UserAnuncio(), arguments: {'primeiraVez': false});
+            }
+          }
+
+        }
+      }
     }
-    datacount.write('foneUser',celular.text);
-    datacount.write('termoOk','NAO');
-    //apaga todas as rotas anteriores
-    Get.offAll(() => UserTermo(), arguments: {'adm':true});
-
-
-    //Grava no banco
   }
 }

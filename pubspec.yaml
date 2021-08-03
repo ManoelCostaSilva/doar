@@ -25,6 +25,7 @@ dependencies:
   get_storage: ^2.0.2
   sn_progress_dialog: ^1.0.2
   firebase_auth: ^3.0.0
+  back_button_interceptor: ^5.0.1
 
 dev_dependencies:
   flutter_test:

@@ -6,12 +6,65 @@ import 'package:intl/intl.dart';
 import 'package:doaruser/widget/texto.dart';
 import 'package:get/get.dart';
 import 'campos.dart';
+import 'campos_cidades.dart';
+import 'campos_uf.dart';
 
 class Dados {
   static final databaseReference = FirebaseFirestore.instance;
   static final datacount = GetStorage();
 
   static List<Campos> campos = [];
+  static List<CamposUf> camposUf = [];
+  static List<CamposUf> camposUfTmp = [];
+
+  static List<CamposCidades> camposCidades = [];
+  static List<CamposCidades> camposCidadesTmp = [];
+
+  static populaUf(){
+    try{
+      camposUf.add(CamposUf('Acre', 'AC', '12'),);
+      camposUf.add(CamposUf('Alagoas', 'AL', '27'),);
+      camposUf.add(CamposUf('Amapá', 'AP', '16'),);
+      camposUf.add(CamposUf('Amazonas', 'AM', '13'),);
+      camposUf.add(CamposUf('Bahia', 'BA', '29'),);
+      camposUf.add(CamposUf('Ceará', 'CE', '23'),);
+      camposUf.add(CamposUf('Destrito Federal', 'DF', '53'),);
+      camposUf.add(CamposUf('Espírito Santo', 'ES', '32'),);
+      camposUf.add(CamposUf('Goiás', 'GO', '52'),);
+      camposUf.add(CamposUf('Maranhão', 'MA', '21'),);
+      camposUf.add(CamposUf('Mato Grosso', 'MT', '51'),);
+      camposUf.add(CamposUf('Mato Grosso do Sul', 'MS', '50'),);
+      camposUf.add(CamposUf('Minas Gerais', 'MG', '31'),);
+      camposUf.add(CamposUf('Pará', 'PA', '15'),);
+      camposUf.add(CamposUf('Paraíba', 'PB', '25'),);
+      camposUf.add(CamposUf('Paraná', 'PR', '41'),);
+      camposUf.add(CamposUf('Pernambuco', 'PE', '26'),);
+      camposUf.add(CamposUf('Piauí', 'PI', '22'),);
+      camposUf.add(CamposUf('Rio de Janeiro', 'RJ', '33'),);
+      camposUf.add(CamposUf('Rio Grande do Norte', 'RN', '24'),);
+      camposUf.add(CamposUf('Rio Grande do Sul', 'RS', '43'),);
+      camposUf.add(CamposUf('Rondônia', 'RO', '11'),);
+      camposUf.add(CamposUf('Roraime', 'RR', '14'),);
+      camposUf.add(CamposUf('Santa Catarina', 'SC', '42'),);
+      camposUf.add(CamposUf('São Paulo', 'SP', '34'),);
+      camposUf.add(CamposUf('Sergipe', 'SE', '28'),);
+      camposUf.add(CamposUf('Tocantins', 'TO', '17'),);
+    } catch (e) {
+    };
+  }
+
+  static solicitarDoacao(String idItem,String fone) async{
+    await Dados.databaseReference
+        .collection('anuncio')
+        .doc(idItem)
+        .collection("solicitantes")
+        .add({
+      'status':'A',
+      'dtCriado': FieldValue.serverTimestamp(),
+      'fone':fone,
+
+    });
+  }
 
   static prepara(var dados,String campo,dynamic controle,bool obrigatorio){
     try{
@@ -36,23 +89,18 @@ class Dados {
       'fone':fone,
       'img':'',
       'nome':'',
+      'termo':'',
       'status':'A',
       'dtCriado': FieldValue.serverTimestamp(),
-      'dtAlterado': FieldValue.serverTimestamp(),
+      'dtAtualizado': FieldValue.serverTimestamp(),
     },);
+    datacount.write('idUser',ref.id.toString());
   }
 
   static Future<dynamic> inserirDados(String TB,BuildContext context,String idItem) async {
 
     Map<String,String> toGravar={};
 
-    var idEmpresa = await getIdEmpresa();
-
-    //SÓ USA ESSA CAMPO SE FOR A TABELA man_produtos_add
-    var idPro='';
-    if(TB=='man_produtos_add') {
-      idPro=getIdProduto();
-    }
     for (var x = 0; x < campos.length; x++) {
       if (campos[x].valor !='') {
         toGravar[campos[x].campo]=campos[x].valor;
@@ -72,6 +120,7 @@ class Dados {
 
       await Dados.databaseReference.collection(TB).doc(idItem).collection('itens').doc(ch).update({
         'status': 'A',
+        'doadoPara': '',
         'dtCriado': FieldValue.serverTimestamp(),
         'dtAlterado': FieldValue.serverTimestamp(),
       });
@@ -86,13 +135,12 @@ class Dados {
         'img': '',
         'dtCriado': FieldValue.serverTimestamp(),
         'dtAlterado': FieldValue.serverTimestamp(),
-        'idEmpresa': idEmpresa,
-        'idProduto':idPro,
       });
     }
 
     if(Utils.store.read('imagem')!=null){
-      String img=Utils.store.read('imagem');await Utils.uploadFile(ref.id, img, TB, context,'DOC','.jpeg');
+      String img=Utils.store.read('imagem');
+      await Utils.uploadFile(ref.id, img, TB, context,'DOC','.jpeg');
     }else{
      // Utils.snak('parabens'.tr, 'sucesso'.tr, true,Colors.green);
     }

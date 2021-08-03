@@ -36,9 +36,10 @@ class _BarraStatusState extends State<BarraStatus> with SingleTickerProviderStat
 
   Widget build(BuildContext context) {
     return AppBar(
+      brightness: Brightness.dark,
       titleSpacing: 0,
       centerTitle: widget.center,
-      title: Texto(tit:widget.tit),
+      title: Texto(tit:widget.tit,cor: Colors.white,),
       backgroundColor: widget.cor==null?Utils.corApp :widget.cor,
     );
   }

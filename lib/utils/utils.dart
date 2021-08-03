@@ -1,4 +1,5 @@
 import 'package:brasil_fields/brasil_fields.dart';
+import 'package:doaruser/widget/texto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
@@ -19,7 +20,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Utils {
   static final databaseReference = FirebaseFirestore.instance;
-  static final Color corApp=HexColor("#F4AE00");//123.717.730-86
+  //static final Color corApp=HexColor("#F4AE00");//123.717.730-86
+  static final Color corApp=HexColor("#00b100");
+
   static final Color corMsg=HexColor("#e2ffc7");
   static const kGoogleApiKey = "AIzaSyDy-E-2iAD-jlYqaJH2BK9ZJQCZGYcJW9Y";
   static final formKeyEmpresa = GlobalKey<FormState>();
@@ -33,9 +36,7 @@ class Utils {
 
   PhoneVerificationFailed verificationFailed =
       (FirebaseAuthException authException) {
-    //showSnackbar('Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}');
   };
-
   static ButtonStyle OutlinedButtonStlo(bool mostraCircular, double elevacao){
     return OutlinedButton.styleFrom(
         padding: mostraCircular?EdgeInsets.symmetric(horizontal: 50, vertical: 15)
@@ -44,6 +45,21 @@ class Utils {
         elevation: elevacao,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),)
+    );
+  }
+
+  static ButtonStyle TextButtoniconStyle(double elevacao){
+    return TextButton.styleFrom(
+      primary: Utils.corApp,
+      backgroundColor: Colors.white,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: Colors.grey,
+          width: 1.0,
+        ),
+      ),
+      elevation: elevacao,
+      side: BorderSide(color: Colors.grey, width: 1),
     );
   }
 
@@ -82,7 +98,7 @@ class Utils {
     }
   }
 
-  static Future<String>  uploadFile(String? id,String _image,String tabela,BuildContext context,
+  static Future<String?>  uploadFile(String? id,String _image,String tabela,BuildContext context,
       String tipo,String extensao) async {
 
     ProgressDialog pd = ProgressDialog(context: context);
@@ -103,7 +119,6 @@ class Utils {
     imagem.write('imagem', imageUrl);
     await updateData(id,imageUrl,tabela);
 
-    throw '';
   }
 
   static deletaImagem(String idImagem,String extensao) async{
@@ -117,27 +132,48 @@ class Utils {
     }
   }
 
-  static showDlg(String titulo,String frase,String botao1,BuildContext context) {
-    showDialog(
+  static showDlg(String titulo,String frase,BuildContext context) async{
+    bool volta=false;
+    await showDialog(
         context: context,
         builder: (_) => new AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.0),
+            borderRadius: BorderRadius.circular(20.0),
+            side: BorderSide(
+              color: Utils.corApp,
+              width: 1.0,
+            ),
           ),
-          title: new Text(titulo,
-            style: TextStyle(fontWeight: FontWeight.bold,color: Utils.corApp,fontSize: 17.00),),
+          title: Texto(tit:titulo,tam: 17,negrito: true,cor:corApp ,),
           content: new Text(frase),
           actions: <Widget>[
-            FlatButton(
-              child: Text(botao1,
-                style: TextStyle(fontWeight: FontWeight.bold,color: Utils.corApp,fontSize: 17.00)
-              ),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-            )
+
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  OutlinedButton(
+                    style: OutlinedButtonStlo(false,6),
+                    child: Texto(tit:'nao'.tr,negrito: true,tam: 17,cor:Colors.white),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      volta=false;
+                    },
+                  ),
+                  OutlinedButton(
+                    style: OutlinedButtonStlo(false,6),
+                    child: Texto(tit:'sim'.tr,negrito: true,tam: 17,cor:Colors.red),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      volta=true;
+                    },
+                  ),
+            ]
+        ),
+
+
           ],
         ));
+    return volta;
   }
 
   static double dist(double lat2,double lon2,double userLat,double userLon)   {
@@ -256,7 +292,6 @@ class Utils {
       //showProgressIndicator:true,
       //dismissDirection: SnackDismissDirection.HORIZONTAL,
       forwardAnimationCurve: Curves.easeOutBack,
-
     );
   }
 }//466

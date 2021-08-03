@@ -12,6 +12,7 @@ class EmpresaSettings extends StatefulWidget {
 
 class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliveClientMixin<EmpresaSettings> {
   static final datacount = GetStorage();
+  static final userNome=datacount.read('userNome');
 
   @override
   void initState() {
@@ -20,7 +21,7 @@ class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: BarraStatus(tit:'Olá Henrique'),
+      appBar: BarraStatus(tit:'Olá '+userNome),
       body: ListView(
         padding: EdgeInsets.all(10.0),
         children: [
@@ -30,15 +31,36 @@ class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliv
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: BtnLista(tit:'categorias'.tr,destino: 'categorias_lista',tam: 18,ID: '1',
-                      icon:Icons.album_outlined, iconCor: Colors.blue,
-                    TB:'categorias'),
+                  SizedBox(
+                    width: 160,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: Colors.grey,
+                          width: 1.0,
+                        ),
+                      ),
+                      child: BtnLista(tit:'doacao_minhas'.tr,destino: 'minhas_doacoes',tam: 18,ID: '1',
+                          icon:Icons.volunteer_activism, iconCor: Colors.red,
+                          TB:'anuncio'),
+                    ),
                   ),
-                  Expanded(
-                    child: BtnLista(tit:'usuarios'.tr,destino: 'usuarios_lista',tam: 18,ID: '1',
-                        icon:Icons.contact_phone_rounded, iconCor: Colors.blue,
-                        TB:'usuarios'),
+
+                  SizedBox(
+                    width: 160,
+                    child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                          color: Colors.grey,
+                          width: 1.0,
+                        ),
+                        ),
+                      child: BtnLista(tit:'perfil'.tr,destino: 'perfil',tam: 18,ID: '1',
+                          icon:Icons.contact_phone_rounded, iconCor: Colors.blue,
+                          TB:'usuarios'),
+                    ),
                   ),
                 ],
               ),

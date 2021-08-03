@@ -35,7 +35,8 @@ class _TextoState extends State<Texto> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return   Text(widget.tit,
       textAlign: widget.alin,
-      maxLines: widget.linhas==null?1:widget.linhas,
+      maxLines: widget.linhas,
+      //overflow: TextOverflow.ellipsis,
       style: TextStyle(
           fontWeight: widget.negrito==null?FontWeight.normal:widget.negrito!?FontWeight.bold:FontWeight.normal,
           color: widget.cor,
