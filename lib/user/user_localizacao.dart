@@ -4,9 +4,11 @@ import 'package:doaruser/adm/lista_uf.dart';
 import 'package:doaruser/cep/municipios.dart';
 import 'package:doaruser/dados/campos_cidades.dart';
 import 'package:doaruser/dados/dados.dart';
+import 'package:doaruser/empresas/emprese_settings.dart';
 import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/barra_status.dart';
+import 'package:doaruser/widget/circular.dart';
 import 'package:doaruser/widget/edit.dart';
 import 'package:doaruser/widget/texto.dart';
 import 'package:flutter/material.dart';
@@ -29,16 +31,21 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
   static final cidadeNome=datacount.read('cidadeNome');
   static final ufNome=datacount.read('uf');
   static final userNome=datacount.read('userNome');
+  var tipo,foneUser;
 
   @override
   void initState() {
     super.initState();
+    foneUser=datacount.read('foneUser');
+    tipo =Get.arguments['tipo'] ?? null;
     Dados.campos.clear();
     Dados.prepara(localizacao, 'nome',nome, true);
     Dados.prepara(localizacao, 'cidadeId',tmp, true);
     Dados.prepara(localizacao, 'cidadeNome',tmp, true);
     Dados.prepara(localizacao, 'ufId',tmp, true);
     Dados.prepara(localizacao, 'ufNome',tmp, true);
+    print('NA LOCALIZAÇÂO');
+    print(foneUser);
     if(ufNome!=null && ufNome!=''){
       ufEscolhida=ufNome;
     }
@@ -60,7 +67,7 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
             padding: EdgeInsets.only(top: 1,bottom: 5,left:8,right: 8),
             child:OutlinedButton(
               style: Utils.OutlinedButtonStlo(false,0),
-              child: Texto(tit:'enviar'.tr,negrito: true,tam: 17,cor:Colors. white),
+              child: mostraCircular?Circular():Texto(tit:'enviar'.tr,negrito: true,tam: 17,cor:Colors. white),
               onPressed: () {
                 enviar();
                 },
@@ -109,6 +116,10 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
       return;
     }
 
+    setState(() {
+      mostraCircular=true;
+    });
+
     datacount.write('cidade', cidadeId);
     datacount.write('cidadeNome', cidadeEscolhida);
     datacount.write('uf', ufEscolhida);
@@ -124,7 +135,23 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
 
       await Dados.atualizaDados('user', context, idUser);
       datacount.write('local', 'OK');
-      Get.offAll(() => UserAnuncio(), arguments: {'primeiraVez': true});
+
+      switch(tipo) {
+        case 'doar'://DOAR ***********************************************
+          Get.offAll(() => UserAnuncio(), arguments: {'primeiraVez': true});
+          break;
+        case 'configuracoes': //CONFIGURAÇÕES ****************************
+          Get.offAll(() => EmpresaSettings(), arguments: {'primeiraVez': true});
+          break;
+        case 'aceitar': // ACEITAR ***************************************
+          var idDoacao=datacount.read('idDoacao');
+          Dados.solicitarDoacao(idDoacao,foneUser);
+          datacount.write('foneUser',foneUser);
+          datacount.write('local','OK');
+          Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidadeId,'local':'OK'});
+          break;
+      }
+
     }else{
       //QUEM VAI RECEBER A DOAÇÃO
       Get.offAll(() => AdmPedidos(), arguments: {'primeiraVez': true});
@@ -132,6 +159,9 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
   }
 
   void getUf()async{
+    setState(() {
+      mostraCircular=true;
+    });
     final ufVolta = await Get.to(() => ListaUf(),);
     if (ufVolta != null) {
       var ufs = ufVolta.toString().split('#');
@@ -154,6 +184,7 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
         var cidade = cidadeVolta.toString().split('#');
         cidadeEscolhida = cidade[1];
         cidadeId =cidade[0];
+        mostraCircular=false;
       });
     }
   }

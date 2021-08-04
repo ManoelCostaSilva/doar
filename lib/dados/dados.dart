@@ -184,7 +184,6 @@ class Dados {
   static Future<dynamic> getUserFone(String fone) async {
     var user;
     user = await Dados.getData('user', 'fone', fone, 'nome');
-    print(user);
     if(user==null){
       return null;
     }else {

@@ -7,6 +7,7 @@ import 'package:doaruser/dados/dados.dart';
 import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/barra_status.dart';
+import 'package:doaruser/widget/circular.dart';
 import 'package:doaruser/widget/edit.dart';
 import 'package:doaruser/widget/texto.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,7 @@ class _UserLocalizacaoState extends State<UserPerfil> {
             padding: EdgeInsets.only(top: 1,bottom: 5,left:8,right: 8),
             child:OutlinedButton(
               style: Utils.OutlinedButtonStlo(false,0),
-              child: Texto(tit:'enviar'.tr,negrito: true,tam: 17,cor:Colors. white),
+              child: mostraCircular?Circular():Texto(tit:'enviar'.tr,negrito: true,tam: 17,cor:Colors. white),
               onPressed: () {
                 enviar();
                 },
@@ -124,6 +125,10 @@ class _UserLocalizacaoState extends State<UserPerfil> {
   }
 
   void getUf()async{
+    print('KKKKKKKKKKKKKKKKKKKKKKKKKK');
+    setState(() {
+      mostraCircular=true;
+    });
     final ufVolta = await Get.to(() => ListaUf(),);
     if (ufVolta != null) {
       var ufs = ufVolta.toString().split('#');
@@ -146,6 +151,7 @@ class _UserLocalizacaoState extends State<UserPerfil> {
         var cidade = cidadeVolta.toString().split('#');
         cidadeEscolhida = cidade[1];
         cidadeId =cidade[0];
+        mostraCircular=false;
       });
     }
   }

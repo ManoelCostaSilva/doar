@@ -2,6 +2,7 @@ import 'package:brasil_fields/brasil_fields.dart';
 import 'package:doaruser/adm/adm_pedidos.dart';
 import 'package:doaruser/dados/dados.dart';
 import 'package:doaruser/doacao/minhas_doacoes.dart';
+import 'package:doaruser/empresas/emprese_settings.dart';
 import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/user/user_localizacao.dart';
 import 'package:doaruser/user/user_termo.dart';
@@ -97,8 +98,8 @@ class _LoginPageState extends State<LoginPage> {
               setState(() {
                 mostraCircular=true;
               });
-              verifyPhoneNumber(context);
-              //simula();
+             // verifyPhoneNumber(context);
+              simula();
             },
           ),
         ),
@@ -139,7 +140,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     var user=await Dados.getUserFone(celular.text);
-    datacount.write('foneUser',celular.text);
 
     if(user==null){
       await Dados.inserirUser(celular.text);
@@ -148,27 +148,29 @@ class _LoginPageState extends State<LoginPage> {
       datacount.write('local','NAO');
       Get.offAll(() => UserTermo(), arguments: {'tipo':tipo});
     }else{
-
+      datacount.write('foneUser',celular.text);
       datacount.write('idUser',user.id);
       if(user['termo']!='Aceito'){
         Get.offAll(() => UserTermo(), arguments: {'tipo':tipo});
       }else{
         datacount.write('termoOk','SIM');
         if(user['ufId']==''){
-          Get.offAll(() => UserLocalizacao(), arguments: {'adm':true});
+          Get.offAll(() => UserLocalizacao(), arguments: {'tipo':tipo});
         }else{
           datacount.write('local','OK');
-          if(tipo=='doacao'){
-            datacount.write('foneUser',celular.text);
-            Get.offAll(() => AdmPedidos(), arguments: {'primeiraVez': false});
-          }else{
-            if(tipo=='minhas_doacoes'){
-              Get.offAll(() => MinhasDoacoes(), arguments: {'primeiraVez': false});
-            }else {
-              Get.offAll(() => UserAnuncio(), arguments: {'primeiraVez': false});
-            }
+          switch(tipo) {
+            case 'doar'://DOAR ***********************************************
+              Get.offAll(() => UserAnuncio(), arguments: {'primeiraVez': true});
+              break;
+            case 'configuracoes': //CONFIGURAÇÕES ****************************
+              Get.offAll(() => EmpresaSettings(), arguments: {'primeiraVez': true});
+              break;
+            case 'aceitar': // ACEITAR ***************************************
+              var idDoacao=datacount.read('idDoacao');
+              Dados.solicitarDoacao(idDoacao,celular.text);
+              Get.offAll(() => AdmPedidos(), arguments: {'foneUser':celular.text,'cidade':user['cidadeId'],'local':'OK'});
+              break;
           }
-
         }
       }
     }

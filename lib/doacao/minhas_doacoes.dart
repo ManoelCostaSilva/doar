@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doaruser/adm/adm_pedidos.dart';
 import 'package:doaruser/dados/dados.dart';
 import 'package:doaruser/user/user_login.dart';
 import 'package:doaruser/utils/utils.dart';
@@ -23,7 +25,16 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
   var userId;
   bool mostra=false,lixeiraVisivel=true;
   String doadoPara='';
+  static final cidade=datacount.read('cidade');
   var vazio='https://firebasestorage.googleapis.com/v0/b/beleza-b3e97.appspot.com/o/DOC%2FNE8etfleO61F2teGzimR.jpeg?alt=media&token=9ce1035e-777e-4f1c-b7ea-fc9f7512164b';
+
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    var foneUser=datacount.read('foneUser');
+    datacount.write('foneUser',foneUser);
+    datacount.write('local','OK');
+    Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidade,'local':'OK'});
+    return true;
+  }
 
   @override
   void dispose() {

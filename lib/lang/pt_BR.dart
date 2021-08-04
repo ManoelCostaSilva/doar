@@ -66,6 +66,7 @@ const Map<String, String> pt_BR = {
   'doacao_ok':'Já doei',
   'doacao_msg':'O solicitante receberá uma mensagem informando que você esta doando esse ítem. Deseja continuar?',
   'doacao_para':'Doado para ',
+  'doacao_solicitada':'Doações solicitadas ',
   'denunciar':'Denunciar',
   'perfil':'Meu Perfil',
   'nao_conect':'Para fazer ou aceitar doações e/ou acessar o menu de configurações você precisa fazer login.',

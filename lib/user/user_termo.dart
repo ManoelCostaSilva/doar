@@ -18,7 +18,7 @@ class _UserTermoState extends State<UserTermo> {
   static final datacount = GetStorage();
   bool mostraCircular=false;
   static final idUser=datacount.read('idUser');
-  var term,tipo;
+  var term,tipo,foneUser;
 
   @override
   void initState() {
@@ -26,6 +26,9 @@ class _UserTermoState extends State<UserTermo> {
     Dados.campos.clear();
     Dados.prepara(term, 'termo',termo, true);
     tipo =Get.arguments['tipo'] ?? null;
+    foneUser=datacount.read('foneUser');
+    print('NO TERMO');
+    print(foneUser);
   }
 
   @override
@@ -75,22 +78,11 @@ class _UserTermoState extends State<UserTermo> {
     await Dados.atualizaDados('user',context,idUser);
     datacount.write('termoOk','OK');
 
-    switch(tipo) {
-      case ''://DESATIVAR
-        Dados.ativarDesativar(dados.id,dados['status'],TB,sub);
-        break;
-      case 2:
-        Get.toNamed(destino,arguments: {'tit':tit,'TB':TB,'dados':dados});
-        break;
-      case 3: // EXCLUIR
-        Dados.del(dados.id,TB,context,sub);
-        break;
-    }
-    if(tipo!='doacao') {
+    //if(tipo!='doar') {
       Get.offAll(() => UserLocalizacao(), arguments: {'tipo': tipo});
-    }else{
-      Get.offAll(() => AdmPedidos(), arguments: {'adm': true});
-    }
+    //}else{
+      //Get.offAll(() => AdmPedidos(), arguments: {'adm': true});
+   // }
 
   }
 }

@@ -29,9 +29,12 @@ class _UserAnuncioState extends State<UserAnuncio> {
   String categoriaEscolhida='Categorias';
   bool mostraCircular=false,priVez=false;
   static final idUser=datacount.read('idUser');
+  static final cidade=datacount.read('cidade');
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    Get.offAll(() => AdmPedidos(), arguments: {'primeiraVez':true});
+    datacount.write('foneUser',foneUser);
+    datacount.write('local','OK');
+    Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidade,'local':'OK'});
     return true;
   }
 

@@ -32,13 +32,12 @@ class _AdmPedidosState extends State<AdmPedidos> {
   TextEditingController editingController = TextEditingController();
   bool mostraCircular=false;
   static final datacount = GetStorage();
-  var foneUser,idUser,texto;
+  var idUser,texto,local;
   static final termo=datacount.read('termoOk');
-  static final local=datacount.read('local');
-  static final cidade=datacount.read('cidade');
   static final cidadeNome=datacount.read('cidadeNome');
   static final ufNome=datacount.read('uf');
-  var uf='',ufEscolhida='uf'.tr,cidadeEscolhida='',categoriaEscolhida='categorias'.tr,idCategoria;
+  static final foneUser2=datacount.read('foneUser');
+  var uf='',ufEscolhida='uf'.tr,cidadeEscolhida='',categoriaEscolhida='categorias'.tr,idCategoria,cidade,foneUser;
   bool mostra=false;
 
   @override
@@ -62,21 +61,53 @@ class _AdmPedidosState extends State<AdmPedidos> {
   @override
   void initState() {
     try{
-      getAnuncios(cidade);
-      foneUser=datacount.read('foneUser');
-      idUser=datacount.read('idUser');
-      if(cidadeNome!=null && cidadeNome!=''){
-        cidadeEscolhida=cidadeNome;
-      }
-      if(ufNome!=null && ufNome!=''){
-        ufEscolhida=ufNome;
-      }
+      cidade =Get.arguments['cidade'] ?? null;
     } catch (e) {
-      getAnuncios('');
+      cidade=datacount.read('cidade');
     }
 
+    if(cidade==null || cidade=='') {
+      getAnuncios('');
+    }else {
+      getAnuncios(cidade);
+    }
+
+    try{
+      cidadeEscolhida=cidadeNome;
+    } catch (e) {
+      cidadeEscolhida='';
+    }
+
+    try{
+      ufEscolhida=ufNome;
+    } catch (e) {
+      ufEscolhida='uf'.tr;
+    }
+
+    try{
+      foneUser =Get.arguments['foneUser'] ?? null;
+    } catch (e) {
+      foneUser=foneUser2;
+    }
+
+    try{
+      local =Get.arguments['local'] ?? null;
+    } catch (e) {
+      local=datacount.read('local');
+    }
+
+    idUser = datacount.read('idUser');
+
+    if (cidadeNome != null && cidadeNome != '') {
+      cidadeEscolhida = cidadeNome;
+    }
+
+    if (ufNome != null && ufNome != '') {
+      ufEscolhida = ufNome;
+    }
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -113,14 +144,24 @@ class _AdmPedidosState extends State<AdmPedidos> {
                     ),
                   ),
 
+                  //CONFIGURAÇÕES *****************************************
                   Transform.translate(
                     offset: Offset(15, 0),
                     child:IconButton(
                       color: Colors.white, icon: new Icon(Icons.settings,),
                       onPressed: () {
-
-                        if(foneUser!=null) {
-                          Get.to(() => EmpresaSettings(), arguments: {'adm': true});
+                        if(foneUser!=null || foneUser2!=null) {
+                          if(termo=='NAO'){
+                            Get.offAll(() => UserTermo(), arguments: {'tipo':'configuracoes'});
+                          }else{
+                            print('LOCAL +++++++++++++++++++++++++++++++++>>>');
+                            print(local);
+                            if(local=='NAO' || local==null){
+                              Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'configuracoes'});
+                            }else{
+                              Get.to(() => EmpresaSettings(), arguments: {'adm': true});
+                            }
+                          }
                         }else{
                           Get.to(() => LoginPage(), arguments: {'tipo':'configuracoes'});
                         }
@@ -135,6 +176,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
         backgroundColor: Utils.corApp,
       ),
 
+      //QUERO DOAR **********************************************************
       bottomNavigationBar:BottomAppBar(
         child:Padding(
           padding: EdgeInsets.only(top: 1,bottom: 5,left:8,right: 8),
@@ -142,18 +184,18 @@ class _AdmPedidosState extends State<AdmPedidos> {
             style: Utils.OutlinedButtonStlo(mostraCircular,0),
             child: Texto(tit:'quero_doar'.tr,negrito: true,tam: 17,cor:Colors. white),
             onPressed: () {
-              if(foneUser==null){
-                Get.to(() => LoginPage(), arguments: {'tipo':'doar'});
-              }else{
-                if(termo==null || termo=='NAO'){
+              if(foneUser!=null || foneUser2!=null) {
+                if(termo=='NAO'){
                   Get.offAll(() => UserTermo(), arguments: {'tipo':'doar'});
                 }else{
-                  if(local==null || local=='NAO'){
-                    Get.to(() => UserLocalizacao(), arguments: {'tipo': 'doar'});
-                  }else {
+                  if(local=='NAO' || local==null){
+                    Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'doar'});
+                  }else{
                     Get.to(() => UserAnuncio(), arguments: {'primeiraVez': false});
                   }
                 }
+              }else{
+                Get.to(() => LoginPage(), arguments: {'tipo':'doar'});
               }
               mostraCircular=true;
             },
@@ -181,20 +223,22 @@ class _AdmPedidosState extends State<AdmPedidos> {
                         Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
+                              //BOTÃO DA UF *******************************
                               TextButton.icon(
                                 style: Utils.TextButtoniconStyle(5),
                                 icon: Icon(Icons.place_outlined), // Your icon here
                                 label: Text(ufEscolhida), // Your text here
                                 onPressed: (){getUf();},
                               ),
+                              //NOME DA CIDADE ****************************
                               Padding(
                                   padding: EdgeInsets.only(top: 0, bottom: 0, left: 10, right: 0),
                                 child:Texto(tit:cidadeEscolhida,tam: 11,negrito: true,),
                               ),
-
                             ]
                         ),
 
+                        //CATEGORIAS **************************************
                         Column(
                             children: <Widget>[
                               TextButton.icon(
@@ -211,6 +255,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                 ),
               ],
             ),
+
             //LISTA TODOS OS ANUNCIOS
             Expanded(
               child:StreamBuilder(
@@ -263,9 +308,6 @@ class _AdmPedidosState extends State<AdmPedidos> {
                         }
                         return Padding(
                             padding: EdgeInsets.only(top: 10, bottom: 0, left: 5, right: 5),
-                          //  child: texto==null?cartao(ds,dateTime)
-                            //    :ds['titulo'].toString().toUpperCase().contains(texto.toString().toUpperCase())
-                              //  ? cartao(ds,dateTime):Container(),
                           child: mostra?cartao(ds,dateTime) :Container(),
                           );
                       });
@@ -360,20 +402,20 @@ class _AdmPedidosState extends State<AdmPedidos> {
   }
 
   verificaDoacao(String idDoacao){
-    if(foneUser==null){
-      Get.to(() => LoginPage(), arguments: {'tipo':'aceitar'});
-    }else{
-      if(termo==null || termo=='NAO'){
+    if(foneUser!=null || foneUser2!=null) {
+      if(termo=='NAO'){
         Get.offAll(() => UserTermo(), arguments: {'tipo':'aceitar'});
       }else{
-        if(local==null || local=='NAO'){
-          Get.to(() => UserLocalizacao(), arguments: {'tipo': 'aceitar'});
-        }else {
+        if(local=='NAO' || local==null){
+          Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'aceitar'});
+        }else{
           Utils.snak('parabens'.tr, 'aguarde_contato'.tr, false, Colors.green);
           Dados.solicitarDoacao(idDoacao,foneUser);
-          //Grava a doação
         }
       }
+    }else{
+      datacount.write('idDoacao',idDoacao);
+      Get.to(() => LoginPage(), arguments: {'tipo':'aceitar'});
     }
   }
 
@@ -400,11 +442,13 @@ class _AdmPedidosState extends State<AdmPedidos> {
               dense:true,
               contentPadding: EdgeInsets.only(top: 5, bottom: 5, left: 1, right: 1),
 
+              //IMAGEM **************************************************
               leading: Transform.translate(
                 offset: Offset(-15, 0),
                 child: Img(tit:ds['img'],),
               ),
 
+              //TÍTULO E DATA *******************************************
               title: Transform.translate(
                 offset: Offset(-40, 0),
                 child:Column(
@@ -416,11 +460,13 @@ class _AdmPedidosState extends State<AdmPedidos> {
                 ),
               ),
 
+              // DESCRIÇÃO **********************************************
               subtitle:Transform.translate(
                 offset: Offset(-40, 0),
                 child: Texto(tit:ds['descricao']),
               ),
 
+              //MENUS ***************************************************
               trailing:Visibility(
                 visible: idUser!=ds['userId'],
                 child:new Container(
@@ -429,6 +475,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
               ),
             ),
 
+            //DETALHES ****************************************************
             StreamBuilder(
               stream: lista,
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
