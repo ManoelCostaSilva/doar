@@ -5,6 +5,8 @@ import 'package:doaruser/cep/municipios.dart';
 import 'package:doaruser/dados/campos_cidades.dart';
 import 'package:doaruser/dados/dados.dart';
 import 'package:doaruser/empresas/emprese_settings.dart';
+import 'package:doaruser/msg/msg.dart';
+import 'package:doaruser/msg/msg_solicitantes.dart';
 import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/barra_status.dart';
@@ -31,21 +33,21 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
   static final cidadeNome=datacount.read('cidadeNome');
   static final ufNome=datacount.read('uf');
   static final userNome=datacount.read('userNome');
-  var tipo,foneUser;
+  var tipo,foneUser,anuncio;
 
   @override
   void initState() {
     super.initState();
     foneUser=datacount.read('foneUser');
     tipo =Get.arguments['tipo'] ?? null;
+    anuncio =Get.arguments['anuncio'] ?? null;
     Dados.campos.clear();
     Dados.prepara(localizacao, 'nome',nome, true);
     Dados.prepara(localizacao, 'cidadeId',tmp, true);
     Dados.prepara(localizacao, 'cidadeNome',tmp, true);
     Dados.prepara(localizacao, 'ufId',tmp, true);
     Dados.prepara(localizacao, 'ufNome',tmp, true);
-    print('NA LOCALIZAÇÂO');
-    print(foneUser);
+
     if(ufNome!=null && ufNome!=''){
       ufEscolhida=ufNome;
     }
@@ -137,6 +139,21 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
       datacount.write('local', 'OK');
 
       switch(tipo) {
+        case 'msg'://MENSSAGENS ***********************************************
+          if (anuncio['idUser'] == idUser) {
+            //QUEM VAI MANDAR A MENSAGEM É O DOADOR
+            //DIRECIONA PARA ELE ESCOLHER ALGUÉM
+            Get.to(() => MsgSolicitantes(), arguments: {'anuncio': anuncio,});
+          }else {
+            //ESTÁ SOLICITANDO A DOAÇÃO
+            Get.to(() => Msg(), arguments: {
+              'idAnuncio': anuncio.id,
+              'de': anuncio['de'],
+              'para': anuncio['para'],
+              'titulo': anuncio['titulo']
+            });
+          }
+          break;
         case 'doar'://DOAR ***********************************************
           Get.offAll(() => UserAnuncio(), arguments: {'primeiraVez': true});
           break;
@@ -145,7 +162,7 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
           break;
         case 'aceitar': // ACEITAR ***************************************
           var idDoacao=datacount.read('idDoacao');
-          Dados.solicitarDoacao(idDoacao,foneUser);
+          Dados.solicitarDoacao(idDoacao,foneUser,'');
           datacount.write('foneUser',foneUser);
           datacount.write('local','OK');
           Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidadeId,'local':'OK'});
@@ -172,7 +189,6 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
   }
 
   getMunicipo(String UF)async{
-    print(UF);
     var municipios = await Municipios.getMunicipio(municipio: UF);
     Dados.camposCidades.clear();
     for (var x = 0; x < municipios.length; x++) {

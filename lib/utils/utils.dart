@@ -203,7 +203,6 @@ class Utils {
   }
 
   static getPermission() async {
-    print("getPermission");
 
     if (await Permission.storage.request().isGranted) {
       // Either the permission was already granted before or the user just granted it.

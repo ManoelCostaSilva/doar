@@ -4,6 +4,7 @@ import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get_storage/get_storage.dart';
 import 'adm/adm_pedidos.dart';
 import 'categorias/categorias.dart';
+import 'doacao/doacao_solicitada.dart';
 import 'doacao/minhas_doacoes.dart';
 import 'lang/translation_service.dart';
 import 'categorias/categorias_lista.dart';
@@ -46,6 +47,7 @@ class MyAppState extends State<MyApp> {
         'usuarios_lista': (context) => UserLista(),
         'user_anuncio': (context) => UserAnuncio(),
         'minhas_doacoes': (context) => MinhasDoacoes(),
+        'doacoes_solicitadas': (context) => DoacoesSolicitadas(),
         'perfil': (context) => UserPerfil(),
       },
       locale: TranslationService.locale,

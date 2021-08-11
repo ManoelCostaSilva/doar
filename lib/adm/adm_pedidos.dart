@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doaruser/cep/municipios.dart';
 import 'package:doaruser/dados/campos_cidades.dart';
 import 'package:doaruser/dados/dados.dart';
+import 'package:doaruser/msg/msg.dart';
+import 'package:doaruser/msg/msg_solicitantes.dart';
 import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/user/user_localizacao.dart';
 import 'package:doaruser/user/user_login.dart';
@@ -27,7 +29,7 @@ class AdmPedidos extends StatefulWidget {
 }
 
 class _AdmPedidosState extends State<AdmPedidos> {
-  dynamic dataList;
+  dynamic dataList,anuncios;
   dynamic lista;
   TextEditingController editingController = TextEditingController();
   bool mostraCircular=false;
@@ -60,6 +62,16 @@ class _AdmPedidosState extends State<AdmPedidos> {
 
   @override
   void initState() {
+
+    Utils.getPermission();
+    print('MKMKMKMKMKMKMK');
+    print(foneUser2);
+    print(local);
+    anuncios = Dados.databaseReference.collection('anuncio')
+        .where('status', isEqualTo: 'A')
+        .orderBy('dtCriado', descending: true).snapshots();
+    datacount.write('anuncios',anuncios);
+
     try{
       cidade =Get.arguments['cidade'] ?? null;
     } catch (e) {
@@ -87,7 +99,11 @@ class _AdmPedidosState extends State<AdmPedidos> {
     try{
       foneUser =Get.arguments['foneUser'] ?? null;
     } catch (e) {
-      foneUser=foneUser2;
+      if(foneUser2==null){
+        foneUser='';
+      }else {
+        foneUser = foneUser2;
+      }
     }
 
     try{
@@ -97,6 +113,8 @@ class _AdmPedidosState extends State<AdmPedidos> {
     }
 
     idUser = datacount.read('idUser');
+
+    print(idUser);
 
     if (cidadeNome != null && cidadeNome != '') {
       cidadeEscolhida = cidadeNome;
@@ -154,8 +172,6 @@ class _AdmPedidosState extends State<AdmPedidos> {
                           if(termo=='NAO'){
                             Get.offAll(() => UserTermo(), arguments: {'tipo':'configuracoes'});
                           }else{
-                            print('LOCAL +++++++++++++++++++++++++++++++++>>>');
-                            print(local);
                             if(local=='NAO' || local==null){
                               Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'configuracoes'});
                             }else{
@@ -165,7 +181,6 @@ class _AdmPedidosState extends State<AdmPedidos> {
                         }else{
                           Get.to(() => LoginPage(), arguments: {'tipo':'configuracoes'});
                         }
-
                         },
                     ),
                   ),
@@ -278,7 +293,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                       itemBuilder: (context, index) {
                         DocumentSnapshot ds = snapshot.data.docs[index];
                         DateTime dateTime = ds["dtCriado"].toDate();
-                        detalhe(ds.id);//temCategoria
+                        detalhe(ds.id,ds['solicitantes']);//temCategoria
                         if(categoriaEscolhida!='categorias'.tr){
                           //FOI ESCOLHIDO UMA CATEGORIA
                           if(ds['categoriaId']==idCategoria){
@@ -363,12 +378,36 @@ class _AdmPedidosState extends State<AdmPedidos> {
         onSelected: (value) {
           switch(value) {
             case 1://ACEITAR DOAÇÃO
-              verificaDoacao(dados.id);
-              //Get.to(() => DoacaoTermo(), arguments: {'primeiraVez': false});
+              verificaDoacao(dados.id,dados['solicitantes']);
               break;
             case 2:
             //Get.toNamed(destino,arguments: {'tit':tit,'TB':TB,'dados':dados});
               break;
+            case 3://ENVIAR MSG
+            if(foneUser==''){
+              Get.to(() => LoginPage(), arguments: {'tipo':'msg','anuncio':dados});
+            }else {
+              if (dados['userId'].toString() == idUser) {
+                //QUEM VAI MANDAR A MENSAGEM É O DOADOR
+                //DIRECIONA PARA ELE ESCOLHER ALGUÉM
+                Get.to(() => MsgSolicitantes(), arguments: {'idAnuncio': dados.id, 'de': idUser});
+              }
+              else {
+                //QUEM VAI MANDAR A MSG É O SOLICITANTE
+                //VAI DIRETO PRA MSG
+                //if(dados['solicitantes']==''){
+                //Utils.snak('atencao'.tr, 'doacao_ninguem'.tr, true, Colors.red);
+                //return;
+                // }
+                Get.to(() => Msg(), arguments: {
+                  'idAnuncio': dados.id,
+                  'de': foneUser,
+                  'para': dados['userId'],
+                  'titulo': dados['titulo']
+                });
+              }
+            }
+            break;
           }
         },
         itemBuilder: (context) => [
@@ -394,14 +433,31 @@ class _AdmPedidosState extends State<AdmPedidos> {
                   Texto(tit:'Denunciar',cor: Colors.red,),
                 ],
               )),
+          PopupMenuItem(
+              value: 3,
+              child: Row(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(2, 2, 8, 2),
+                    child: Icon(Icons.message_outlined),
+                  ),
+                  Texto(tit:'msg_enviar'.tr,),
+                ],
+              )),
         ]);
+
+    //
   }
 
-  detalhe(String id)async{
+  detalhe(String id,String solicitantes)async{
     lista = await Dados.databaseReference.collection('anuncio').doc(id).collection('solicitantes').snapshots();
   }
 
-  verificaDoacao(String idDoacao){
+  verificaDoacao(String idDoacao,String solicitantes){
+    if(solicitantes.contains(foneUser)){
+      Utils.snak('atencao'.tr, 'aguarde_solicitacao'.tr, false, Colors.red);
+      return;
+    }
     if(foneUser!=null || foneUser2!=null) {
       if(termo=='NAO'){
         Get.offAll(() => UserTermo(), arguments: {'tipo':'aceitar'});
@@ -410,7 +466,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
           Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'aceitar'});
         }else{
           Utils.snak('parabens'.tr, 'aguarde_contato'.tr, false, Colors.green);
-          Dados.solicitarDoacao(idDoacao,foneUser);
+          Dados.solicitarDoacao(idDoacao,foneUser,solicitantes);
         }
       }
     }else{
@@ -424,6 +480,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
     setState(() {
     });
   }
+
   Widget cartao(dynamic ds,DateTime dateTime){
     return Card(
 
@@ -454,7 +511,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                 child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Texto(tit:ds["titulo"]+'= '+ds['categoriaNome'],tam:16.0),
+                      Texto(tit:ds["titulo"],tam:16.0),
                       Texto(tit:DateFormat('dd/MM/yy hh:mm').format(dateTime)+' = '+ds['cidadeNome'],tam: 10,)
                     ]
                 ),
@@ -475,29 +532,12 @@ class _AdmPedidosState extends State<AdmPedidos> {
               ),
             ),
 
-            //DETALHES ****************************************************
-            StreamBuilder(
-              stream: lista,
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (!snapshot.hasData) {
-                  return SemRegistro(tit:' ');
-                }
-                if(snapshot!=null) {
-                  return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data.docs.length,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot det = snapshot.data.docs[index];
-
-                        return Padding(
-                          padding: EdgeInsets.only(top: 0, bottom: 0, left: 15, right: 0),
-                          child: Texto(tit: det['fone']==foneUser?'Você já solicitou':''),
-                        );
-                      });
-                }else{
-                  return Container();
-                }
-              },
+            Visibility(
+                visible: ds['solicitantes'].toString().contains(foneUser) && foneUser!='',
+                child:Padding(
+                  padding: EdgeInsets.only(top: 0, bottom: 10, left: 15, right: 0),
+                  child: Texto(tit: 'aguarde_solicitacao'.tr,cor:Colors.red),
+                )
             ),
           ]
       ),

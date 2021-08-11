@@ -102,7 +102,7 @@ class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliv
                           width: 1.0,
                         ),
                       ),
-                      child: BtnLista(tit:'doacao_solicitada'.tr,destino: 'minhas_doacoes',tam: 18,ID: '1',
+                      child: BtnLista(tit:'doacao_solicitada'.tr,destino: 'doacoes_solicitadas',tam: 16,ID: '1',
                           icon:Icons.volunteer_activism, iconCor: Utils.corApp,
                           TB:'anuncio'),
                     ),
