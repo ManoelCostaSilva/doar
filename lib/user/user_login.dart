@@ -1,8 +1,9 @@
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:doaruser/adm/adm_pedidos.dart';
 import 'package:doaruser/dados/dados.dart';
-import 'package:doaruser/doacao/minhas_doacoes.dart';
 import 'package:doaruser/empresas/emprese_settings.dart';
+import 'package:doaruser/msg/msg.dart';
+import 'package:doaruser/msg/msg_solicitantes.dart';
 import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/user/user_localizacao.dart';
 import 'package:doaruser/user/user_termo.dart';
@@ -26,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   var celular = TextEditingController();
   static final datacount = GetStorage();
   bool mostraCircular=false;
-  var fones,tipo;
+  var fones,tipo,anuncio;
 
   @override
   void initState() {
@@ -35,6 +36,11 @@ class _LoginPageState extends State<LoginPage> {
       tipo =Get.arguments['tipo'] ?? null;
     } catch (e) {
       tipo='login';
+    }
+    try{
+      anuncio =Get.arguments['anuncio'] ?? null;
+    } catch (e) {
+      anuncio='';
     }
     Dados.campos.clear();
     Dados.prepara(fones, 'fone',celular, true);
@@ -114,11 +120,11 @@ class _LoginPageState extends State<LoginPage> {
             Texto(tit:'autenticacao'.tr,cor: Utils.corApp,tam: 30,negrito: true,),
 
             Padding(
-              padding: EdgeInsets.only(top: 20,bottom: 0,left:10,right: 10),
-              child:Texto(tit:'nao_conect'.tr,tam: 16,),
+              padding: EdgeInsets.only(top: 30,bottom: 0,left:10,right: 10),
+              child:Texto(tit:'nao_conect'.tr,tam: 20,),
             ),
 
-            SizedBox(height: 80.0,),
+            SizedBox(height: 70.0,),
 
             Texto(tit:'nro_cell'.tr,tam: 18,),
 
@@ -146,19 +152,34 @@ class _LoginPageState extends State<LoginPage> {
       datacount.write('foneUser',celular.text);
       datacount.write('termoOk','NAO');
       datacount.write('local','NAO');
-      Get.offAll(() => UserTermo(), arguments: {'tipo':tipo});
+      Get.offAll(() => UserTermo(), arguments: {'tipo':tipo,'anuncio':anuncio});
     }else{
       datacount.write('foneUser',celular.text);
       datacount.write('idUser',user.id);
       if(user['termo']!='Aceito'){
-        Get.offAll(() => UserTermo(), arguments: {'tipo':tipo});
+        Get.offAll(() => UserTermo(), arguments: {'tipo':tipo,'anuncio':anuncio});
       }else{
         datacount.write('termoOk','SIM');
         if(user['ufId']==''){
-          Get.offAll(() => UserLocalizacao(), arguments: {'tipo':tipo});
+          Get.offAll(() => UserLocalizacao(), arguments: {'tipo':tipo,'anuncio':anuncio});
         }else{
           datacount.write('local','OK');
           switch(tipo) {
+            case 'msg'://MENSAGEM *********************************************
+              if (anuncio['userId'].toString() == user.id.toString()) {
+                //QUEM VAI MANDAR A MENSAGEM É O DOADOR
+                //DIRECIONA PARA ELE ESCOLHER ALGUÉM
+                Get.offAll(() => MsgSolicitantes(), arguments: {'anuncio': anuncio,});
+              }else {
+                //ESTÁ SOLICITANDO A DOAÇÃO
+                Get.off(() => Msg(), arguments: {
+                  'idAnuncio': anuncio.id,
+                  'de': anuncio['de'],
+                  'para': anuncio['userId'],
+                  'titulo': anuncio['titulo']
+                });
+              }
+              break;
             case 'doar'://DOAR ***********************************************
               Get.offAll(() => UserAnuncio(), arguments: {'primeiraVez': true});
               break;

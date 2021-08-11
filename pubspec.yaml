@@ -31,9 +31,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-flutter:
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "images/icone_doacao.png"
 
+flutter:
   uses-material-design: true
 
   assets:
   - images/camera_desligada.png
+  - images/icone_doacao.png

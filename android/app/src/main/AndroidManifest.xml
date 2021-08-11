@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="br.com.mk.doar.user.doaruser">
    <application
-        android:label="doaruser"
+        android:label="doAção"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

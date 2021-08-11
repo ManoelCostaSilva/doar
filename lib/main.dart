@@ -9,8 +9,6 @@ import 'lang/translation_service.dart';
 import 'categorias/categorias_lista.dart';
 import 'user/user_anuncio.dart';
 import 'user/user_lista.dart';
-import 'user/user_localizacao.dart';
-import 'user/user_login.dart';
 import 'user/user_perfil.dart';
 
 void main() async{

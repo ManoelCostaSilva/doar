@@ -67,7 +67,12 @@ const Map<String, String> en_US = {
   'doacao_msg':'O solicitante receberá uma mensagem informando que você esta doando esse ítem. Deseja continuar?',
   'doacao_para':'Doado para ',
   'doacao_solicitada':'Doações solicitadas ',
+  'doacao_ninguem':'Ninguém ainda solicitou essa doação.',
+  'doacao_minha':'Você não pode solicitar sua própria doação',
   'denunciar':'Denunciar',
   'perfil':'Meu Perfil',
-  'nao_conect':'Para fazer ou aceitar doações e/ou acessar o menu de configurações você precisa fazer login.',
+  'nao_conect':'Para fazer ou aceitar doações, enviar menssagens e/ou acessar o menu de configurações você precisa fazer login.',
+  'msg_enviar':'Mensagens',
+  'msg_no':'Nenuhma mensagem ainda',
+  'pesquisa':'Pesquisa',
 };
