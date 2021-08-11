@@ -63,6 +63,8 @@ class _UserAnuncioState extends State<UserAnuncio> {
     Dados.prepara(anuncio, 'cidadeId',div, true);
     Dados.prepara(anuncio, 'cidadeNome',div, true);
     Dados.prepara(anuncio, 'doadoPara',div, true);
+    Dados.prepara(anuncio, 'solicitantes',div, true);
+
   }
 
   @override
@@ -162,6 +164,7 @@ class _UserAnuncioState extends State<UserAnuncio> {
       Dados.setDadosParaGravaCliente('ufId', user['ufId']);
       Dados.setDadosParaGravaCliente('ufNome', user['ufNome']);
       Dados.setDadosParaGravaCliente('doadoPara', 'NINGUEM');
+      Dados.setDadosParaGravaCliente('solicitantes', '');
 
       await Dados.inserirDados('anuncio', context, '');
 

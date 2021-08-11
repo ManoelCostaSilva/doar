@@ -53,7 +53,15 @@ class Dados {
     };
   }
 
-  static solicitarDoacao(String idItem,String fone) async{
+  static solicitarDoacao(String idItem,String foneSolicitante,String solicitantes) async{
+    if(solicitantes!='') {
+      if (!solicitantes.contains('foneSolicitante')) {
+        await Dados.databaseReference.collection('anuncio').doc(idItem).update({
+          'solicitantes': foneSolicitante,
+          'dtAlterado': FieldValue.serverTimestamp(),
+        });
+      }
+    }
     await Dados.databaseReference
         .collection('anuncio')
         .doc(idItem)
@@ -61,7 +69,7 @@ class Dados {
         .add({
       'status':'A',
       'dtCriado': FieldValue.serverTimestamp(),
-      'fone':fone,
+      'fone':foneSolicitante,
 
     });
   }

@@ -47,8 +47,7 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
     Dados.prepara(localizacao, 'cidadeNome',tmp, true);
     Dados.prepara(localizacao, 'ufId',tmp, true);
     Dados.prepara(localizacao, 'ufNome',tmp, true);
-    print('NA LOCALIZAÇÂO');
-    print(foneUser);
+
     if(ufNome!=null && ufNome!=''){
       ufEscolhida=ufNome;
     }
@@ -163,7 +162,7 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
           break;
         case 'aceitar': // ACEITAR ***************************************
           var idDoacao=datacount.read('idDoacao');
-          Dados.solicitarDoacao(idDoacao,foneUser);
+          Dados.solicitarDoacao(idDoacao,foneUser,'');
           datacount.write('foneUser',foneUser);
           datacount.write('local','OK');
           Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidadeId,'local':'OK'});
@@ -190,7 +189,6 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
   }
 
   getMunicipo(String UF)async{
-    print(UF);
     var municipios = await Municipios.getMunicipio(municipio: UF);
     Dados.camposCidades.clear();
     for (var x = 0; x < municipios.length; x++) {
