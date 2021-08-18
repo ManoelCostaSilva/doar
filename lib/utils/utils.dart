@@ -1,4 +1,5 @@
 import 'package:brasil_fields/brasil_fields.dart';
+import 'package:doaruser/user/user_struc.dart';
 import 'package:doaruser/widget/texto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data';
 import 'op_filtro.dart';
 import 'package:get/get.dart';
@@ -19,6 +21,7 @@ import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Utils {
+  static final datacount = GetStorage();
   static final databaseReference = FirebaseFirestore.instance;
   //static final Color corApp=HexColor("#F4AE00");//123.717.730-86
   static final Color corApp=HexColor("#00b100");
@@ -33,10 +36,31 @@ class Utils {
   static final picker = ImagePicker();
   static final store = GetStorage();
 
+  static setUserData(var user) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String encodedData = UserStruc.encode([
+      UserStruc(cidadeId: user['cidadeId'], cidadeNome: user['cidadeNome'],
+          ufId:user['ufId'] ,ufNome: user['ufNome'], fone:user['fone'],
+          img:user['img'],nome:user['nome'],status:user['status'], termo:user['termo'],
+          id: user.id ),
+    ]);
+    await prefs.setString('user', encodedData);
+  }
+
+  static  getUserData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? users = await prefs.getString('user');
+    if(users==null){
+      return null;
+    }
+    final List<UserStruc>? user = UserStruc.decode(users!);
+    return user![0];
+  }
 
   PhoneVerificationFailed verificationFailed =
       (FirebaseAuthException authException) {
   };
+
   static ButtonStyle OutlinedButtonStlo(bool mostraCircular, double elevacao){
     return OutlinedButton.styleFrom(
         padding: mostraCircular?EdgeInsets.symmetric(horizontal: 50, vertical: 15)

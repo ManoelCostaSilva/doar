@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doaruser/dados/dados.dart';
-import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/widget/barra_status.dart';
 import 'package:doaruser/widget/img.dart';
 import 'package:doaruser/widget/sem_registro.dart';

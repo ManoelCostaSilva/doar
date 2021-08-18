@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/texto.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 class BarraStatus extends StatefulWidget implements PreferredSizeWidget{
   @override

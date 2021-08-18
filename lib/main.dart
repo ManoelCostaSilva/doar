@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get_storage/get_storage.dart';
 import 'adm/adm_pedidos.dart';
@@ -13,11 +14,12 @@ import 'user/user_lista.dart';
 import 'user/user_perfil.dart';
 
 void main() async{
-  await GetStorage.init();
+  await GetStorage.init('user');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MyApp());
 }
+
 
 class MyApp extends StatefulWidget {
   @override
@@ -25,10 +27,6 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  static final datacount = GetStorage();
-  static final foneUser=datacount.read('foneUser');
-  static final cidade=datacount.read('cidade');
-
   @override
   void initState() {
     super.initState();
@@ -61,5 +59,4 @@ class MyAppState extends State<MyApp> {
       home: AdmPedidos(),
     );
   }
-
 }

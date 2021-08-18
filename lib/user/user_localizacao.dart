@@ -29,16 +29,16 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
   var localizacao,ufEscolhida='uf'.tr,cidadeEscolhida='';
   bool mostraCircular=false;
   String ufID='',cidadeId='';
-  static final idUser=datacount.read('idUser');
-  static final cidadeNome=datacount.read('cidadeNome');
-  static final ufNome=datacount.read('uf');
-  static final userNome=datacount.read('userNome');
-  var tipo,foneUser,anuncio;
+  var tipo,anuncio,user;
+
+  inicia()async {
+    user =  await Utils.getUserData();
+  }
 
   @override
   void initState() {
     super.initState();
-    foneUser=datacount.read('foneUser');
+    inicia();
     tipo =Get.arguments['tipo'] ?? null;
     anuncio =Get.arguments['anuncio'] ?? null;
     Dados.campos.clear();
@@ -48,14 +48,15 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
     Dados.prepara(localizacao, 'ufId',tmp, true);
     Dados.prepara(localizacao, 'ufNome',tmp, true);
 
-    if(ufNome!=null && ufNome!=''){
-      ufEscolhida=ufNome;
+    if(user.ufId!=null){
+      ufEscolhida=user.ufNome.toString();
+      cidadeEscolhida=user.cidadeNome.toString();
+      ufID=user.ufId.toString();
+      cidadeId=user.cidadeId.toString();
     }
-    if(cidadeNome!=null && cidadeNome!=''){
-      cidadeEscolhida=cidadeNome;
-    }
-    if(ufNome!=null && userNome!=''){
-      nome.text=userNome;
+
+    if(user.nome!=null){
+      nome.text=user.nome.toString();
     }
   }
 
@@ -122,12 +123,12 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
       mostraCircular=true;
     });
 
-    datacount.write('cidade', cidadeId);
-    datacount.write('cidadeNome', cidadeEscolhida);
-    datacount.write('uf', ufEscolhida);
-    datacount.write('userNome', nome.text);
+    //datacount.write('cidade', cidadeId);
+    //datacount.write('cidadeNome', cidadeEscolhida);
+    //datacount.write('uf', ufEscolhida);
+    //datacount.write('userNome', nome.text);
 
-    if(idUser!=null && idUser!='') {
+    if(user.id!=null) {
       //DOADOR
       Dados.setDadosParaGravaCliente('nome', nome.text);
       Dados.setDadosParaGravaCliente('cidadeId', cidadeId);
@@ -135,12 +136,13 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
       Dados.setDadosParaGravaCliente('ufId', ufID);
       Dados.setDadosParaGravaCliente('ufNome', ufEscolhida);
 
-      await Dados.atualizaDados('user', context, idUser);
-      datacount.write('local', 'OK');
+      await Dados.atualizaDados('user', context, user.id);
+      user=await Dados.getUserFone(user.fone.toString());
+      Utils.setUserData(user);
 
       switch(tipo) {
         case 'msg'://MENSSAGENS ***********************************************
-          if (anuncio['idUser'] == idUser) {
+          if (anuncio['idUser'] == user.id) {
             //QUEM VAI MANDAR A MENSAGEM É O DOADOR
             //DIRECIONA PARA ELE ESCOLHER ALGUÉM
             Get.to(() => MsgSolicitantes(), arguments: {'anuncio': anuncio,});
@@ -161,11 +163,10 @@ class _UserLocalizacaoState extends State<UserLocalizacao> {
           Get.offAll(() => EmpresaSettings(), arguments: {'primeiraVez': true});
           break;
         case 'aceitar': // ACEITAR ***************************************
-          var idDoacao=datacount.read('idDoacao');
-          Dados.solicitarDoacao(idDoacao,foneUser,'');
-          datacount.write('foneUser',foneUser);
+          Dados.solicitarDoacao(user.fone.toString(),anuncio);
+          datacount.write('foneUser',user.fone.toString());
           datacount.write('local','OK');
-          Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidadeId,'local':'OK'});
+          Get.offAll(() => AdmPedidos(), arguments: {'foneUser':user.fone.toString(),'cidade':cidadeId,'local':'OK'});
           break;
       }
 

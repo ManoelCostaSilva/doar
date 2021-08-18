@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doaruser/adm/adm_pedidos.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -53,24 +54,23 @@ class Dados {
     };
   }
 
-  static solicitarDoacao(String idItem,String foneSolicitante,String solicitantes) async{
-    if(solicitantes!='') {
-      if (!solicitantes.contains('foneSolicitante')) {
-        await Dados.databaseReference.collection('anuncio').doc(idItem).update({
-          'solicitantes': foneSolicitante,
-          'dtAlterado': FieldValue.serverTimestamp(),
-        });
-      }
+  static solicitarDoacao(String foneSolicitante,var anuncio) async{
+
+    if (!anuncio['solicitantes'].contains(foneSolicitante)) {
+      String soli=anuncio['solicitantes']+foneSolicitante+'#';
+      await Dados.databaseReference.collection('anuncio').doc(anuncio.id).update({
+        'solicitantes': soli,
+        'dtAlterado': FieldValue.serverTimestamp(),
+      });
     }
     await Dados.databaseReference
         .collection('anuncio')
-        .doc(idItem)
+        .doc(anuncio.id)
         .collection("solicitantes")
         .add({
       'status':'A',
       'dtCriado': FieldValue.serverTimestamp(),
       'fone':foneSolicitante,
-
     });
   }
 
@@ -102,7 +102,6 @@ class Dados {
       'dtCriado': FieldValue.serverTimestamp(),
       'dtAtualizado': FieldValue.serverTimestamp(),
     },);
-    datacount.write('idUser',ref.id.toString());
   }
 
   static Future<dynamic> inserirDados(String TB,BuildContext context,String idItem) async {

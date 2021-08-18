@@ -1,4 +1,3 @@
-import 'package:brasil_fields/brasil_fields.dart';
 import 'package:doaruser/dados/campos_cidades.dart';
 import 'package:doaruser/dados/dados.dart';
 import 'package:doaruser/widget/barra_status.dart';
@@ -83,7 +82,6 @@ class _ListaCidadesState extends State<ListaCidades> with AutomaticKeepAliveClie
       dataList=Dados.camposCidadesTmp;
       setState(() {});
     }
-
   }
 
   @override

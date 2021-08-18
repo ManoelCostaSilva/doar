@@ -1,4 +1,5 @@
 const Map<String, String> pt_BR = {
+  'termo': 'Ao concordar com esse termo e condições você afirma ser maior de 18 anos e proprietário único e exclusivo do objeto ou serviço que vai doar.É vetada qualquer forma de doação que envolva valores financeiros.',
   'bem_vindo': 'Bem vindo(a)',
   'categorias':'Categorias',
   'categorias_inf':'Por favor informe uma categoria',

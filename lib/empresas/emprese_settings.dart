@@ -2,10 +2,8 @@ import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:doaruser/adm/adm_pedidos.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:doaruser/widget/barra_status.dart';
 import 'package:get/get.dart';
-
 import 'empresa_settings_itens.dart';
 
 class EmpresaSettings extends StatefulWidget {
@@ -14,17 +12,14 @@ class EmpresaSettings extends StatefulWidget {
 }
 
 class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliveClientMixin<EmpresaSettings> {
-  static final datacount = GetStorage();
-  static final userNome=datacount.read('userNome');
-  static final cidade=datacount.read('cidade');
-  var foneUser;
+  var user;
+  static var userNome='';
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    datacount.write('foneUser',foneUser);
-    datacount.write('local','OK');
-    Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidade,'local':'OK'});
+    Get.offAll(() => AdmPedidos(), arguments: {});
     return true;
   }
+
 
   @override
   void dispose() {
@@ -32,16 +27,26 @@ class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliv
     super.dispose();
   }
 
+  inicia()async {
+    user =  await Utils.getUserData();
+    if (user!.nome != null) {
+      setState(() {
+        userNome=user.nome;
+      });
+    }
+  }
+
   @override
   void initState() {
-    foneUser=datacount.read('foneUser');
+    inicia();
     BackButtonInterceptor.add(myInterceptor);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: BarraStatus(tit:userNome!=null?'Olá '+userNome:'Olá'),
+      //appBar: BarraStatus(tit:'Olá '+Obx(() => Text("$userNome"))),
+      appBar: BarraStatus(tit:'Olá '+userNome),
       body: ListView(
         padding: EdgeInsets.all(10.0),
         children: [

@@ -3,10 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doaruser/cep/municipios.dart';
 import 'package:doaruser/dados/campos_cidades.dart';
 import 'package:doaruser/dados/dados.dart';
+import 'package:doaruser/msg/msg.dart';
+import 'package:doaruser/msg/msg_solicitantes.dart';
+import 'package:doaruser/notificacao/bloc.dart';
 import 'package:doaruser/user/user_anuncio.dart';
 import 'package:doaruser/user/user_localizacao.dart';
 import 'package:doaruser/user/user_login.dart';
 import 'package:doaruser/user/user_termo.dart';
+import 'package:doaruser/widget/circular.dart';
 import 'package:doaruser/widget/img.dart';
 import 'package:doaruser/widget/sem_registro.dart';
 import 'package:get/get.dart';
@@ -15,11 +19,11 @@ import 'package:get/route_manager.dart';
 import 'package:doaruser/empresas/emprese_settings.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/texto.dart';
-import 'package:get_storage/get_storage.dart';
 import 'lista_cidades.dart';
 import 'lista_padrao.dart';
 import 'lista_uf.dart';
 import 'package:intl/intl.dart';
+import 'zoom_img.dart';
 
 class AdmPedidos extends StatefulWidget {
   @override
@@ -27,18 +31,13 @@ class AdmPedidos extends StatefulWidget {
 }
 
 class _AdmPedidosState extends State<AdmPedidos> {
-  dynamic dataList;
-  dynamic lista;
+  dynamic dataList,lista;
   TextEditingController editingController = TextEditingController();
   bool mostraCircular=false;
-  static final datacount = GetStorage();
-  var idUser,texto,local;
-  static final termo=datacount.read('termoOk');
-  static final cidadeNome=datacount.read('cidadeNome');
-  static final ufNome=datacount.read('uf');
-  static final foneUser2=datacount.read('foneUser');
-  var uf='',ufEscolhida='uf'.tr,cidadeEscolhida='',categoriaEscolhida='categorias'.tr,idCategoria,cidade,foneUser;
-  bool mostra=false;
+  var ufEscolhida='uf'.tr,cidadeEscolhida='',categoriaEscolhida='categorias'.tr, idCategoria;
+  var texto,userFone='',user;
+  var bloc = BlocHome();
+  bool mostra=false,mostraSolicitante=false;
 
   @override
   void dispose() {
@@ -57,57 +56,30 @@ class _AdmPedidosState extends State<AdmPedidos> {
           .orderBy('dtCriado', descending: true).snapshots();
     }
   }
+  inicia()async {
+    user =  await Utils.getUserData();
+    setState(() {
+    if(user!=null) {
+      if (user!.ufId != null) {
+        getAnuncios(user.cidadeId);
+        cidadeEscolhida = user.cidadeNome;
+        ufEscolhida = user.ufNome;
+        userFone = user.fone.toString();
+      } else {
+        getAnuncios('');
+      }
+    }else{
+      getAnuncios('');
+    }
+    });
+  }
 
   @override
   void initState() {
-    try{
-      cidade =Get.arguments['cidade'] ?? null;
-    } catch (e) {
-      cidade=datacount.read('cidade');
-    }
-
-    if(cidade==null || cidade=='') {
-      getAnuncios('');
-    }else {
-      getAnuncios(cidade);
-    }
-
-    try{
-      cidadeEscolhida=cidadeNome;
-    } catch (e) {
-      cidadeEscolhida='';
-    }
-
-    try{
-      ufEscolhida=ufNome;
-    } catch (e) {
-      ufEscolhida='uf'.tr;
-    }
-
-    try{
-      foneUser =Get.arguments['foneUser'] ?? null;
-    } catch (e) {
-      foneUser=foneUser2;
-    }
-
-    try{
-      local =Get.arguments['local'] ?? null;
-    } catch (e) {
-      local=datacount.read('local');
-    }
-
-    idUser = datacount.read('idUser');
-
-    if (cidadeNome != null && cidadeNome != '') {
-      cidadeEscolhida = cidadeNome;
-    }
-
-    if (ufNome != null && ufNome != '') {
-      ufEscolhida = ufNome;
-    }
+    //bloc.initOneSignal();
+    inicia();
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -150,13 +122,11 @@ class _AdmPedidosState extends State<AdmPedidos> {
                     child:IconButton(
                       color: Colors.white, icon: new Icon(Icons.settings,),
                       onPressed: () {
-                        if(foneUser!=null || foneUser2!=null) {
-                          if(termo=='NAO'){
+                        if(user!=null) {
+                          if(user.termo!='Aceito'){
                             Get.offAll(() => UserTermo(), arguments: {'tipo':'configuracoes'});
                           }else{
-                            print('LOCAL +++++++++++++++++++++++++++++++++>>>');
-                            print(local);
-                            if(local=='NAO' || local==null){
+                            if(user.ufId==null){
                               Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'configuracoes'});
                             }else{
                               Get.to(() => EmpresaSettings(), arguments: {'adm': true});
@@ -165,8 +135,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                         }else{
                           Get.to(() => LoginPage(), arguments: {'tipo':'configuracoes'});
                         }
-
-                        },
+                      },
                     ),
                   ),
                 ],
@@ -182,13 +151,14 @@ class _AdmPedidosState extends State<AdmPedidos> {
           padding: EdgeInsets.only(top: 1,bottom: 5,left:8,right: 8),
           child:OutlinedButton(
             style: Utils.OutlinedButtonStlo(mostraCircular,0),
-            child: Texto(tit:'quero_doar'.tr,negrito: true,tam: 17,cor:Colors. white),
+            child: mostraCircular?Circular():Texto(tit:'quero_doar'.tr,negrito: true,tam: 17,cor:Colors. white),
             onPressed: () {
-              if(foneUser!=null || foneUser2!=null) {
-                if(termo=='NAO'){
+              //bloc.sendNotification();
+              if(user!=null) {
+                if(user.termo!='Aceito'){
                   Get.offAll(() => UserTermo(), arguments: {'tipo':'doar'});
                 }else{
-                  if(local=='NAO' || local==null){
+                  if(user.ufId==null){
                     Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'doar'});
                   }else{
                     Get.to(() => UserAnuncio(), arguments: {'primeiraVez': false});
@@ -209,7 +179,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
               title:Row(
                   children: <Widget>[
                     Texto(tit:'filtro'.tr,negrito: true,tam: 18,),
-                    Texto(tit:foneUser!=null?' - '+foneUser:'',tam: 14,),
+                    Texto(tit:userFone,tam: 14,),
                   ]
               ),
 
@@ -232,7 +202,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                               ),
                               //NOME DA CIDADE ****************************
                               Padding(
-                                  padding: EdgeInsets.only(top: 0, bottom: 0, left: 10, right: 0),
+                                padding: EdgeInsets.only(top: 0, bottom: 0, left: 10, right: 0),
                                 child:Texto(tit:cidadeEscolhida,tam: 11,negrito: true,),
                               ),
                             ]
@@ -278,7 +248,11 @@ class _AdmPedidosState extends State<AdmPedidos> {
                       itemBuilder: (context, index) {
                         DocumentSnapshot ds = snapshot.data.docs[index];
                         DateTime dateTime = ds["dtCriado"].toDate();
-                        detalhe(ds.id);//temCategoria
+
+                        if(user!=null){
+                          mostraSolicitante = ds['solicitantes'].toString().contains(user.fone.toString());
+                        }
+
                         if(categoriaEscolhida!='categorias'.tr){
                           //FOI ESCOLHIDO UMA CATEGORIA
                           if(ds['categoriaId']==idCategoria){
@@ -290,7 +264,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                               }
                             }else{
                               mostra=true;
-                              }
+                            }
                           }else{
                             mostra=false;
                           }
@@ -307,9 +281,9 @@ class _AdmPedidosState extends State<AdmPedidos> {
                           }
                         }
                         return Padding(
-                            padding: EdgeInsets.only(top: 10, bottom: 0, left: 5, right: 5),
+                          padding: EdgeInsets.only(top: 10, bottom: 0, left: 5, right: 5),
                           child: mostra?cartao(ds,dateTime) :Container(),
-                          );
+                        );
                       });
                 },
               ),
@@ -341,7 +315,6 @@ class _AdmPedidosState extends State<AdmPedidos> {
         var cidade = cidadeVolta.toString().split('#');
         ufEscolhida=ufEscolhida;
         cidadeEscolhida=cidade[1];
-        uf=UF;
         getAnuncios(cidade[0]);
       });
     }
@@ -358,16 +331,37 @@ class _AdmPedidosState extends State<AdmPedidos> {
     }
   }
 
-  Widget menus(dynamic dados,BuildContext context) {
+  Widget menus(dynamic anuncios,BuildContext context) {
     return PopupMenuButton(
         onSelected: (value) {
           switch(value) {
             case 1://ACEITAR DOAÇÃO
-              verificaDoacao(dados.id);
-              //Get.to(() => DoacaoTermo(), arguments: {'primeiraVez': false});
+              verificaDoacao(anuncios);
               break;
             case 2:
             //Get.toNamed(destino,arguments: {'tit':tit,'TB':TB,'dados':dados});
+              break;
+
+            case 3://ENVIAR MSG
+              if(user==null){
+                Get.to(() => LoginPage(), arguments: {'tipo':'msg','anuncio':anuncios});
+              }else {
+                if (anuncios['userId'].toString() == user.id.toString()) {
+                  //QUEM VAI MANDAR A MENSAGEM É O DOADOR
+                  //DIRECIONA PARA ELE ESCOLHER ALGUÉM
+                  Get.to(() => MsgSolicitantes(), arguments: {'anuncio':anuncios});
+                }
+                else {
+                  //QUEM VAI MANDAR A MSG É O SOLICITANTE
+                  //VAI DIRETO PRA MSG
+                  Get.to(() => Msg(), arguments: {
+                    'idAnuncio': anuncios.id,
+                    'de': user.fone,
+                    'para': anuncios['userId'],
+                    'titulo': anuncios['titulo']
+                  });
+                }
+              }
               break;
           }
         },
@@ -394,28 +388,44 @@ class _AdmPedidosState extends State<AdmPedidos> {
                   Texto(tit:'Denunciar',cor: Colors.red,),
                 ],
               )),
+          PopupMenuItem(
+              value: 3,
+              child: Row(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(2, 2, 8, 2),
+                    child: Icon(Icons.message_outlined),
+                  ),
+                  Texto(tit:'msg_enviar'.tr,),
+                ],
+              )),
         ]);
   }
 
-  detalhe(String id)async{
-    lista = await Dados.databaseReference.collection('anuncio').doc(id).collection('solicitantes').snapshots();
-  }
+  verificaDoacao(var anuncio){
+    if(user!=null) {
+      if(user.id==anuncio['userId']){
+        Utils.snak('atencao'.tr, 'doacao_minha'.tr, true, Colors.red);
+        return;
+      }
+      if (anuncio['solicitantes'].contains(user.fone)) {
+        Utils.snak('atenacao'.tr, 'aguarde_solicitacao'.tr, false, Colors.red);
+        return;
+      }
 
-  verificaDoacao(String idDoacao){
-    if(foneUser!=null || foneUser2!=null) {
-      if(termo=='NAO'){
+      if(user.termo!='Aceito'){
         Get.offAll(() => UserTermo(), arguments: {'tipo':'aceitar'});
       }else{
-        if(local=='NAO' || local==null){
+        if(user.ufId==null){
           Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'aceitar'});
         }else{
           Utils.snak('parabens'.tr, 'aguarde_contato'.tr, false, Colors.green);
-          Dados.solicitarDoacao(idDoacao,foneUser);
+          Dados.solicitarDoacao(anuncio,user.fone);
         }
       }
     }else{
-      datacount.write('idDoacao',idDoacao);
-      Get.to(() => LoginPage(), arguments: {'tipo':'aceitar'});
+      //gsUser.write('idDoacao',anuncio.id);
+      Get.to(() => LoginPage(), arguments: {'tipo':'aceitar','anuncio':anuncio});
     }
   }
 
@@ -424,9 +434,9 @@ class _AdmPedidosState extends State<AdmPedidos> {
     setState(() {
     });
   }
+
   Widget cartao(dynamic ds,DateTime dateTime){
     return Card(
-
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
         side: BorderSide(
@@ -445,7 +455,12 @@ class _AdmPedidosState extends State<AdmPedidos> {
               //IMAGEM **************************************************
               leading: Transform.translate(
                 offset: Offset(-15, 0),
-                child: Img(tit:ds['img'],),
+                child: InkWell(
+                  onTap: () {
+                    Get.to(() => ZoomImg(), arguments: {'img':ds['img'],'titulo':ds['titulo']});
+                    },
+                  child:Img(tit:ds['img'],),
+                ),
               ),
 
               //TÍTULO E DATA *******************************************
@@ -454,7 +469,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                 child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Texto(tit:ds["titulo"]+'= '+ds['categoriaNome'],tam:16.0),
+                      Texto(tit:ds["titulo"],tam:16.0),
                       Texto(tit:DateFormat('dd/MM/yy hh:mm').format(dateTime)+' = '+ds['cidadeNome'],tam: 10,)
                     ]
                 ),
@@ -468,36 +483,24 @@ class _AdmPedidosState extends State<AdmPedidos> {
 
               //MENUS ***************************************************
               trailing:Visibility(
-                visible: idUser!=ds['userId'],
+                //visible: idUser!=ds['userId'],
+                visible: true,
                 child:new Container(
                     child: menus(ds,context,)
                 ),
               ),
             ),
 
-            //DETALHES ****************************************************
-            StreamBuilder(
-              stream: lista,
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (!snapshot.hasData) {
-                  return SemRegistro(tit:' ');
-                }
-                if(snapshot!=null) {
-                  return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data.docs.length,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot det = snapshot.data.docs[index];
-
-                        return Padding(
-                          padding: EdgeInsets.only(top: 0, bottom: 0, left: 15, right: 0),
-                          child: Texto(tit: det['fone']==foneUser?'Você já solicitou':''),
-                        );
-                      });
-                }else{
-                  return Container();
-                }
-              },
+            Visibility(
+                visible: mostraSolicitante,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child:
+                  Padding(
+                    padding: EdgeInsets.only(top: 0, bottom: 10, left: 0, right: 10),
+                    child: Texto(tit: 'aguarde_solicitacao'.tr,cor:Colors.red,tam:10),
+                  ),
+                )
             ),
           ]
       ),

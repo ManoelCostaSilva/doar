@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -25,9 +24,14 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   var celular = TextEditingController();
-  static final datacount = GetStorage();
   bool mostraCircular=false;
   var fones,tipo,anuncio;
+
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -104,8 +108,8 @@ class _LoginPageState extends State<LoginPage> {
               setState(() {
                 mostraCircular=true;
               });
-             // verifyPhoneNumber(context);
-              simula();
+              verifyPhoneNumber(context);
+              //simula();
             },
           ),
         ),
@@ -149,21 +153,17 @@ class _LoginPageState extends State<LoginPage> {
 
     if(user==null){
       await Dados.inserirUser(celular.text);
-      datacount.write('foneUser',celular.text);
-      datacount.write('termoOk','NAO');
-      datacount.write('local','NAO');
+      user=await Dados.getUserFone(celular.text);
+      Utils.setUserData(user);
       Get.offAll(() => UserTermo(), arguments: {'tipo':tipo,'anuncio':anuncio});
     }else{
-      datacount.write('foneUser',celular.text);
-      datacount.write('idUser',user.id);
+      Utils.setUserData(user);
       if(user['termo']!='Aceito'){
         Get.offAll(() => UserTermo(), arguments: {'tipo':tipo,'anuncio':anuncio});
       }else{
-        datacount.write('termoOk','SIM');
         if(user['ufId']==''){
           Get.offAll(() => UserLocalizacao(), arguments: {'tipo':tipo,'anuncio':anuncio});
         }else{
-          datacount.write('local','OK');
           switch(tipo) {
             case 'msg'://MENSAGEM *********************************************
               if (anuncio['userId'].toString() == user.id.toString()) {
@@ -187,9 +187,8 @@ class _LoginPageState extends State<LoginPage> {
               Get.offAll(() => EmpresaSettings(), arguments: {'primeiraVez': true});
               break;
             case 'aceitar': // ACEITAR ***************************************
-              var idDoacao=datacount.read('idDoacao');
-              Dados.solicitarDoacao(idDoacao,celular.text);
-              Get.offAll(() => AdmPedidos(), arguments: {'foneUser':celular.text,'cidade':user['cidadeId'],'local':'OK'});
+              await Dados.solicitarDoacao(celular.text,anuncio);
+              Get.offAll(() => AdmPedidos(), arguments: {});
               break;
           }
         }

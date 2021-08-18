@@ -1,4 +1,3 @@
-import 'package:doaruser/cep/ufs.dart';
 import 'package:doaruser/dados/campos_uf.dart';
 import 'package:doaruser/dados/dados.dart';
 import 'package:doaruser/widget/barra_status.dart';

@@ -20,21 +20,21 @@ class UserAnuncio extends StatefulWidget {
 
 class _UserAnuncioState extends State<UserAnuncio> {
   static final datacount = GetStorage();
-  static final foneUser=datacount.read('foneUser');
+  //static final foneUser=datacount.read('foneUser');
   var titulo = TextEditingController();
   var descricao = TextEditingController();
   var div = TextEditingController();
   File? _image;
-  var url,idCat,anuncio;
+  var url,idCat,anuncio,user;
   String categoriaEscolhida='Categorias';
   bool mostraCircular=false,priVez=false;
-  static final idUser=datacount.read('idUser');
-  static final cidade=datacount.read('cidade');
+  //static final idUser=datacount.read('idUser');
+  //static final cidade=datacount.read('cidade');
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    datacount.write('foneUser',foneUser);
-    datacount.write('local','OK');
-    Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidade,'local':'OK'});
+    //datacount.write('foneUser',foneUser);
+    //datacount.write('local','OK');
+    Get.offAll(() => AdmPedidos(), arguments: {});
     return true;
   }
 
@@ -42,6 +42,19 @@ class _UserAnuncioState extends State<UserAnuncio> {
   void dispose() {
     BackButtonInterceptor.remove(myInterceptor);
     super.dispose();
+  }
+
+  inicia()async {
+    user =  await Utils.getUserData();
+    if (user!.ufId != null) {
+     // setState(() {
+        //ufEscolhida = user.ufNome;
+        //cidadeEscolhida = user.cidadeNome;
+        //ufID = user.ufId;
+        //cidadeId = user.cidadeId;
+        //nome.text=user.nome==null?'':user.nome;
+      //});
+    }
   }
 
   @override
@@ -64,7 +77,6 @@ class _UserAnuncioState extends State<UserAnuncio> {
     Dados.prepara(anuncio, 'cidadeNome',div, true);
     Dados.prepara(anuncio, 'doadoPara',div, true);
     Dados.prepara(anuncio, 'solicitantes',div, true);
-
   }
 
   @override
@@ -152,17 +164,17 @@ class _UserAnuncioState extends State<UserAnuncio> {
         mostraCircular=true;
       });
 
-      var user=await Dados.getUserFone(foneUser);
+      //var user=await Dados.getUserFone(user.fone);
 
       Dados.setDadosParaGravaCliente('categoriaId', idCat);
       Dados.setDadosParaGravaCliente('categoriaNome', categoriaEscolhida);
-      Dados.setDadosParaGravaCliente('userId', idUser);
+      Dados.setDadosParaGravaCliente('userId', user.id);
 
-      Dados.setDadosParaGravaCliente('nome', user['nome']);
-      Dados.setDadosParaGravaCliente('cidadeId', user['cidadeId']);
-      Dados.setDadosParaGravaCliente('cidadeNome', user['cidadeNome']);
-      Dados.setDadosParaGravaCliente('ufId', user['ufId']);
-      Dados.setDadosParaGravaCliente('ufNome', user['ufNome']);
+      Dados.setDadosParaGravaCliente('nome', user.nome);
+      Dados.setDadosParaGravaCliente('cidadeId', user.cidadeId);
+      Dados.setDadosParaGravaCliente('cidadeNome', user.cidadeNome);
+      Dados.setDadosParaGravaCliente('ufId', user.ufId);
+      Dados.setDadosParaGravaCliente('ufNome', user.ufNome);
       Dados.setDadosParaGravaCliente('doadoPara', 'NINGUEM');
       Dados.setDadosParaGravaCliente('solicitantes', '');
 

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class Msg extends StatefulWidget {
   @override
@@ -69,15 +70,15 @@ class _MsgState extends State<Msg> with AutomaticKeepAliveClientMixin<Msg> {
       ),
 
       body: Stack(
-            children: <Widget>[//SingleChildScrollView
-              SingleChildScrollView(
-                child:Column(
-                    children: <Widget>[
-                      //MENSAGENS ****************************************************
-                      Column(
-              children: <Widget>[
-                //PESQUISA ************************************************
-                /*
+          children: <Widget>[//SingleChildScrollView
+            SingleChildScrollView(
+              child:Column(
+                  children: <Widget>[
+                    //MENSAGENS ****************************************************
+                    Column(
+                        children: <Widget>[
+                          //PESQUISA ************************************************
+                          /*
                 deixa para quando precisar
                 Padding(
                   padding: EdgeInsets.only(top: 5,bottom: 0,left:10,right: 10),
@@ -96,95 +97,91 @@ class _MsgState extends State<Msg> with AutomaticKeepAliveClientMixin<Msg> {
                 ),
                  */
 
-                //MENSSAGENS *********************************************
-                Padding(
-                  padding: EdgeInsets.only(top: 5,bottom: 0,left:5,right: 5),
-                  child:StreamBuilder(
-                      stream: dataList,
-                      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                        if (snapshot.hasError) {
-                          return SemRegistro(tit:'msg_no'.tr);
-                        }
-                        if (!snapshot.hasData) {
-                          return SemRegistro(tit:'msg_no'.tr);
-                        }
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return SemRegistro(tit:'aguarde'.tr);
-                        }
+                          //MENSSAGENS *********************************************
+                          Padding(
+                            padding: EdgeInsets.only(top: 5,bottom: 0,left:5,right: 5),
+                            child:StreamBuilder(
+                                stream: dataList,
+                                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                                  if (snapshot.hasError) {
+                                    return SemRegistro(tit:'msg_no'.tr);
+                                  }
+                                  if (!snapshot.hasData) {
+                                    return SemRegistro(tit:'msg_no'.tr);
+                                  }
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return SemRegistro(tit:'aguarde'.tr);
+                                  }
 
-                        return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data.docs.length,
-                            itemBuilder: (context, index) {
-                              DocumentSnapshot ds = snapshot.data.docs[index];
-                              DateTime dateTime = ds["dtAtualizado"].toDate();
+                                  return ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: snapshot.data.docs.length,
+                                      itemBuilder: (context, index) {
+                                        DocumentSnapshot ds = snapshot.data.docs[index];
+                                        DateTime dateTime = ds["dtAtualizado"].toDate();
 
-                              if((ds['de'].toString()==de || ds['para'].toString()==de) && (ds['de'].toString()==para
-                                  || ds['para'].toString()==para)) {
+                                        if((ds['de'].toString()==de || ds['para'].toString()==de) && (ds['de'].toString()==para
+                                            || ds['para'].toString()==para)) {
 
-                                if (pesquisaMsg.text.isEmpty) {
-                                  return mostraMsg(ds, dateTime);
-                                } else if (ds["msg"].toLowerCase().contains(
-                                    pesquisaMsg.text.toLowerCase())) {
-                                  return mostraMsg(ds, dateTime);
-                                } else {
-                                  return Container();
-                                }
-                              }else{
-                                return Container();
-                              }
-                            }
-                            );
-                      }),
-                ),
-              ]
-          ),
-                    ]
+                                          if (pesquisaMsg.text.isEmpty) {
+                                            return mostraMsg(ds, dateTime);
+                                          } else if (ds["msg"].toLowerCase().contains(
+                                              pesquisaMsg.text.toLowerCase())) {
+                                            return mostraMsg(ds, dateTime);
+                                          } else {
+                                            return Container();
+                                          }
+                                        }else{
+                                          return Container();
+                                        }
+                                      }
+                                      );
+                                }),
+                          ),
+                        ]
+                    ),
+                  ]
                 ),
               ),
               //DIGITAR A MSG E ENVIAR ****************************************
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: Container(
-                  padding: EdgeInsets.only(top: 0,bottom: 0,left:5,right: 5),
-                  height: 65,
-                  color: Colors.white,
-
-                  //width: double.infinity,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 5,bottom: 5,left:10,right: 10),
-                    child:TextField(
-                        controller: nota,
-                        decoration: InputDecoration(
-                            hintText: "Mensagem",
-                            suffixIcon: IconButton(
-                              onPressed: () {
-
-                                if(nota.text!='') {
-                                  Dados.databaseReference.collection('msg').add({
-                                    'msg': nota.text,
-                                    'idAnuncio':idAnuncio,
-                                    'de':de,
-                                    'para':para,
-                                    'dtAtualizado':FieldValue.serverTimestamp(),
-                                  });
-
-                                  FocusScope.of(context).requestFocus(FocusNode());
-                                  nota.text = '';
-                                }
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                padding: EdgeInsets.only(top: 0,bottom: 0,left:5,right: 5),
+                height: 65,
+                color: Colors.white,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 5,bottom: 5,left:10,right: 10),
+                  child:TextField(
+                      controller: nota,
+                      decoration: InputDecoration(
+                          hintText: "Mensagem",
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              if(nota.text!='') {
+                                Dados.databaseReference.collection('msg').add({
+                                  'msg': nota.text,
+                                  'idAnuncio':idAnuncio,
+                                  'de':de,
+                                  'para':para,
+                                  'dtAtualizado':FieldValue.serverTimestamp(),
+                                });
+                                FocusScope.of(context).requestFocus(FocusNode());
+                                nota.text = '';
+                              }
                               },
-                              icon: Icon(Icons.send),
-                            ),
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(20.0)))),
-                        onTap:() {
-                          // currentFocus = FocusScope.of(context);
-                        }
-                    ),
-                  ),
+                            icon: Icon(Icons.send),
+                          ),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(20.0)))),
+                      onTap:() {
+                        // currentFocus = FocusScope.of(context);
+                      }
+                      ),
                 ),
               ),
-            ]
+            ),
+          ]
       ),
     );
   }

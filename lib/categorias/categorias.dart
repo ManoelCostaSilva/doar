@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doaruser/dados/dados.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/barra_status.dart';
+import 'package:doaruser/widget/circular.dart';
 import 'package:doaruser/widget/edit.dart';
 import 'package:doaruser/widget/mk_BoxDecoration.dart';
 import 'package:doaruser/widget/texto.dart';
@@ -46,7 +47,7 @@ class CategoriasState extends State<Categorias> with AutomaticKeepAliveClientMix
             padding: EdgeInsets.only(top: 1,bottom: 5,left:8,right: 8),
             child:OutlinedButton(
               style: Utils.OutlinedButtonStlo(mostraCircular,0),
-              child: Texto(tit:'salvar'.tr,negrito: true,tam: 17,cor:Colors. white),
+              child: mostraCircular?Circular():Texto(tit:'salvar'.tr,negrito: true,tam: 17,cor:Colors. white),
               onPressed: () {
                 mostraCircular=true;
                 //setState(() {});
@@ -85,6 +86,9 @@ class CategoriasState extends State<Categorias> with AutomaticKeepAliveClientMix
       return;
     }
     DocumentReference ref;
+    setState(() {
+      mostraCircular=true;
+    });
     if(categorias==null) {
       ref = await Dados.databaseReference.collection(TB).add({
         'nome': nome.text,
@@ -104,8 +108,9 @@ class CategoriasState extends State<Categorias> with AutomaticKeepAliveClientMix
       String img=Utils.store.read('imagem');
       await Utils.uploadFile(ID, img, TB, context,'DOC','.jpeg');
     }
-    mostraCircular=false;
-    //Get.back();
+    setState(() {
+      mostraCircular=false;
+    });
   }
 
   @override

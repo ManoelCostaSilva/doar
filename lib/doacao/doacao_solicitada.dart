@@ -18,16 +18,15 @@ class DoacoesSolicitadas extends StatefulWidget {
 
 class MinhasDoacoesState extends State<DoacoesSolicitadas> {
   dynamic dataList;
-  static final datacount = GetStorage();
   var userFone;
   bool mostra=false;
   String doadoPara='';
-  static final cidade=datacount.read('cidade');
+  static final cidade=Utils.datacount.read('cidade');
   var vazio='https://firebasestorage.googleapis.com/v0/b/beleza-b3e97.appspot.com/o/DOC%2FNE8etfleO61F2teGzimR.jpeg?alt=media&token=9ce1035e-777e-4f1c-b7ea-fc9f7512164b';
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    datacount.write('foneUser',userFone);
-    datacount.write('local','OK');
+    Utils.datacount.write('foneUser',userFone);
+    Utils.datacount.write('local','OK');
     Get.offAll(() => AdmPedidos(), arguments: {'foneUser':userFone,'cidade':cidade,'local':'OK'});
     return true;
   }
@@ -38,12 +37,12 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
   }
 
   Future<dynamic> getAnuncios() async {
-    dataList =datacount.read('anuncios');
+    dataList =Utils.datacount.read('anuncios');
   }
 
   @override
   void initState() {
-    userFone=datacount.read('foneUser');
+    userFone=Utils.datacount.read('foneUser');
     getAnuncios();
     super.initState();
   }

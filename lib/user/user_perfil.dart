@@ -1,10 +1,10 @@
-import 'package:doaruser/adm/adm_pedidos.dart';
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:doaruser/adm/lista_cidades.dart';
 import 'package:doaruser/adm/lista_uf.dart';
 import 'package:doaruser/cep/municipios.dart';
 import 'package:doaruser/dados/campos_cidades.dart';
 import 'package:doaruser/dados/dados.dart';
-import 'package:doaruser/user/user_anuncio.dart';
+import 'package:doaruser/empresas/emprese_settings.dart';
 import 'package:doaruser/utils/utils.dart';
 import 'package:doaruser/widget/barra_status.dart';
 import 'package:doaruser/widget/circular.dart';
@@ -12,7 +12,6 @@ import 'package:doaruser/widget/edit.dart';
 import 'package:doaruser/widget/texto.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 class UserPerfil extends StatefulWidget {
   @override
@@ -20,35 +19,48 @@ class UserPerfil extends StatefulWidget {
 }
 
 class _UserLocalizacaoState extends State<UserPerfil> {
-  static final datacount = GetStorage();
+  var user;
   var nome = TextEditingController();
   var tmp = TextEditingController();
   var localizacao,ufEscolhida='uf'.tr,cidadeEscolhida='';
   bool mostraCircular=false;
   String ufID='',cidadeId='';
-  static final idUser=datacount.read('idUser');
-  static final cidadeNome=datacount.read('cidadeNome');
-  static final ufNome=datacount.read('uf');
-  static final userNome=datacount.read('userNome');
+
+  inicia()async {
+    user =  await Utils.getUserData();
+    if (user!.ufId != null) {
+      setState(() {
+        ufEscolhida = user.ufNome;
+        cidadeEscolhida = user.cidadeNome;
+        ufID = user.ufId;
+        cidadeId = user.cidadeId;
+        nome.text=user.nome==null?'':user.nome;
+      });
+    }
+  }
+
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    Get.offAll(() => EmpresaSettings(), arguments: {});
+    return true;
+  }
+
+  @override
+  void dispose() {
+    BackButtonInterceptor.remove(myInterceptor);
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    inicia();
+    BackButtonInterceptor.add(myInterceptor);
     Dados.campos.clear();
     Dados.prepara(localizacao, 'nome',nome, true);
     Dados.prepara(localizacao, 'cidadeId',tmp, true);
     Dados.prepara(localizacao, 'cidadeNome',tmp, true);
     Dados.prepara(localizacao, 'ufId',tmp, true);
     Dados.prepara(localizacao, 'ufNome',tmp, true);
-    if(ufNome!=null && ufNome!=''){
-      ufEscolhida=ufNome;
-    }
-    if(cidadeNome!=null && cidadeNome!=''){
-      cidadeEscolhida=cidadeNome;
-    }
-    if(userNome!=null && userNome!=''){
-      nome.text=userNome;
-    }
   }
 
   @override
@@ -109,23 +121,29 @@ class _UserLocalizacaoState extends State<UserPerfil> {
       Utils.snak('atencao'.tr, 'informe_ufCidade'.tr, true, Colors.red);
       return;
     }
-
-    datacount.write('cidade', cidadeId);
-    datacount.write('cidadeNome', cidadeEscolhida);
-    datacount.write('uf', ufEscolhida);
-    datacount.write('userNome', nome.text);
-
+    setState(() {
+      mostraCircular=true;
+    });
     Dados.setDadosParaGravaCliente('nome', nome.text);
     Dados.setDadosParaGravaCliente('cidadeId', cidadeId);
     Dados.setDadosParaGravaCliente('cidadeNome', cidadeEscolhida);
     Dados.setDadosParaGravaCliente('ufId', ufID);
     Dados.setDadosParaGravaCliente('ufNome', ufEscolhida);
-    await Dados.atualizaDados('user', context, idUser);
-    Utils.snak('parabens'.tr, 'sucesso'.tr, false, Colors.green);
+    await Dados.atualizaDados('user', context, user.id);
+
+    var userAtualizado=await Dados.getUserFone(user.fone.toString());
+    Utils.setUserData(userAtualizado);
+
+    //var myClassObject = new EmpresaSettingsState();
+    //myClassObject.userNome =nome.text;
+
+    setState(() {
+      //EmpresaSettingsState.userNome=nome.text;
+      mostraCircular=false;
+    });
   }
 
   void getUf()async{
-    print('KKKKKKKKKKKKKKKKKKKKKKKKKK');
     setState(() {
       mostraCircular=true;
     });
