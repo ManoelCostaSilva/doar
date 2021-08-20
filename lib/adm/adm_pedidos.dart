@@ -31,7 +31,7 @@ class AdmPedidos extends StatefulWidget {
 }
 
 class _AdmPedidosState extends State<AdmPedidos> {
-  dynamic dataList,lista;
+  dynamic dataList,lista,anuncios;
   TextEditingController editingController = TextEditingController();
   bool mostraCircular=false;
   var ufEscolhida='uf'.tr,cidadeEscolhida='',categoriaEscolhida='categorias'.tr, idCategoria;
@@ -51,6 +51,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
           .where('status', isEqualTo: 'A')
           .orderBy('dtCriado', descending: true).snapshots();
     }else{
+
       dataList = Dados.databaseReference.collection('anuncio')
           .where('status', isEqualTo: 'A')
           .orderBy('dtCriado', descending: true).snapshots();
@@ -129,7 +130,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
                             if(user.ufId==null){
                               Get.offAll(() => UserLocalizacao(), arguments: {'tipo':'configuracoes'});
                             }else{
-                              Get.to(() => EmpresaSettings(), arguments: {'adm': true});
+                              enviaParaEmpresa();
                             }
                           }
                         }else{
@@ -153,7 +154,6 @@ class _AdmPedidosState extends State<AdmPedidos> {
             style: Utils.OutlinedButtonStlo(mostraCircular,0),
             child: mostraCircular?Circular():Texto(tit:'quero_doar'.tr,negrito: true,tam: 17,cor:Colors. white),
             onPressed: () {
-              //bloc.sendNotification();
               if(user!=null) {
                 if(user.termo!='Aceito'){
                   Get.offAll(() => UserTermo(), arguments: {'tipo':'doar'});
@@ -167,7 +167,7 @@ class _AdmPedidosState extends State<AdmPedidos> {
               }else{
                 Get.to(() => LoginPage(), arguments: {'tipo':'doar'});
               }
-              mostraCircular=true;
+              //mostraCircular=true;
             },
           ),
         ),
@@ -454,30 +454,33 @@ class _AdmPedidosState extends State<AdmPedidos> {
 
               //IMAGEM **************************************************
               leading: Transform.translate(
-                offset: Offset(-15, 0),
-                child: InkWell(
+                offset: Offset(-5, 10),
+                child:InkWell(
                   onTap: () {
                     Get.to(() => ZoomImg(), arguments: {'img':ds['img'],'titulo':ds['titulo']});
                     },
-                  child:Img(tit:ds['img'],),
+                  child:Tooltip(
+                    message: 'Pressione para ampliar',
+                    child: Img(tit:ds['img'],radio: 40,largura: 50,altura: 100,),
+                  ),
                 ),
               ),
 
               //TÍTULO E DATA *******************************************
               title: Transform.translate(
-                offset: Offset(-40, 0),
+                offset: Offset(-25, 10),
                 child:Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Texto(tit:ds["titulo"],tam:16.0),
-                      Texto(tit:DateFormat('dd/MM/yy hh:mm').format(dateTime)+' = '+ds['cidadeNome'],tam: 10,)
+                      Texto(tit:DateFormat('dd/MM/yy hh:mm').format(dateTime)+' = '+ds['cidadeNome'],tam: 12,)
                     ]
                 ),
               ),
 
               // DESCRIÇÃO **********************************************
               subtitle:Transform.translate(
-                offset: Offset(-40, 0),
+                offset: Offset(-25, 10),
                 child: Texto(tit:ds['descricao']),
               ),
 
@@ -492,18 +495,31 @@ class _AdmPedidosState extends State<AdmPedidos> {
             ),
 
             Visibility(
-                visible: mostraSolicitante,
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child:
-                  Padding(
-                    padding: EdgeInsets.only(top: 0, bottom: 10, left: 0, right: 10),
-                    child: Texto(tit: 'aguarde_solicitacao'.tr,cor:Colors.red,tam:10),
-                  ),
-                )
+                visible: true,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 0, bottom: 10, left: 10, right: 10),
+                      child: Texto(tit: 'Pressione para ampliar',cor:Colors.green,tam:10),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 0, bottom: 10, left: 0, right: 10),
+                      child: mostraSolicitante?Texto(tit: 'aguarde_solicitacao'.tr,cor:Colors.red,tam:10):Text(''),
+                    ),
+                    ]
+                ),
             ),
           ]
       ),
     );
+  }
+  enviaParaEmpresa()async{
+    anuncios = await Dados.databaseReference.collection('anuncio')
+        .where('status', isEqualTo: 'A')
+        .orderBy('dtCriado', descending: true).snapshots();
+
+    Utils.datacount.write('anuncios', anuncios) ;
+    Get.to(() => EmpresaSettings(), arguments: {'anuncios': anuncios});
   }
 }

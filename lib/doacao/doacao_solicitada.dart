@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:doaruser/widget/texto.dart';
-import 'package:get_storage/get_storage.dart';
 
 class DoacoesSolicitadas extends StatefulWidget {
   @override
@@ -18,16 +17,12 @@ class DoacoesSolicitadas extends StatefulWidget {
 
 class MinhasDoacoesState extends State<DoacoesSolicitadas> {
   dynamic dataList;
-  var userFone;
-  bool mostra=false;
+  var user;
   String doadoPara='';
-  static final cidade=Utils.datacount.read('cidade');
   var vazio='https://firebasestorage.googleapis.com/v0/b/beleza-b3e97.appspot.com/o/DOC%2FNE8etfleO61F2teGzimR.jpeg?alt=media&token=9ce1035e-777e-4f1c-b7ea-fc9f7512164b';
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    Utils.datacount.write('foneUser',userFone);
-    Utils.datacount.write('local','OK');
-    Get.offAll(() => AdmPedidos(), arguments: {'foneUser':userFone,'cidade':cidade,'local':'OK'});
+    Get.offAll(() => AdmPedidos(), arguments: {});
     return true;
   }
 
@@ -37,13 +32,19 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
   }
 
   Future<dynamic> getAnuncios() async {
-    dataList =Utils.datacount.read('anuncios');
+    dataList =await Utils.datacount.read('anuncios');
+    setState(() {});
+  }
+
+  inicia()async {
+    user =  await Utils.getUserData();
+    getAnuncios();
+
   }
 
   @override
   void initState() {
-    userFone=Utils.datacount.read('foneUser');
-    getAnuncios();
+    inicia();
     super.initState();
   }
 
@@ -75,13 +76,16 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
                       itemBuilder: (context, index) {
                         DocumentSnapshot ds = snapshot.data.docs[index];
                         DateTime dateTime = ds["dtCriado"].toDate();
-
+                        DateTime dtAlterado = ds["dtAlterado"].toDate();
                         if(ds['doadoPara']=='NINGUEM'){
+                          //corData=Colors.black;
                           doadoPara='';
                         }else{
                           doadoPara='DOADO';
+                         // corData=Colors.red;
                         }
-                        if(ds['solicitantes'].toString().contains(userFone)) {
+
+                        if(ds['solicitantes'].toString().contains(user.fone)) {
                           return Column(
                               children: <Widget>[
                                 Padding(
@@ -92,8 +96,7 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10.0),
                                       side: BorderSide(
-                                        color: Utils.corApp,
-                                        width: 2.0,
+                                        color: Utils.corApp, width: 2.0,
                                       ),
                                     ),
 
@@ -104,8 +107,7 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
                                             Transform.translate(
                                               offset: Offset(5, 0),
                                               child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment
-                                                      .start,
+                                                  mainAxisAlignment: MainAxisAlignment.start,
                                                   children: <Widget>[
                                                     //IMAGEM*************************************
                                                     Padding(
@@ -119,7 +121,6 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
                                                                   : NetworkImage(ds['img']),
                                                               fit: BoxFit.fill,
                                                             ),
-
                                                             borderRadius: BorderRadius.all(Radius.circular(40))
                                                         ),
                                                       ),
@@ -127,14 +128,8 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
 
                                                     //TÍTULO ***********************************
                                                     Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 0,
-                                                          bottom: 10,
-                                                          left: 08,
-                                                          right: 0),
-                                                      child: Texto(
-                                                          tit: ds["titulo"],
-                                                          tam: 16.0),
+                                                      padding: EdgeInsets.only(top: 0, bottom: 10, left: 08, right: 0),
+                                                      child: Texto(tit: ds["titulo"], tam: 16.0),
                                                     ),
                                                   ]
                                               ),
@@ -142,12 +137,13 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
 
                                             //DATA, LIXEIRA E SETINHA
                                             Transform.translate(
-                                              offset: Offset(18, -60),
+                                              offset: Offset(18, -40),
                                               child: Container(
                                                 width: MediaQuery.of(context).size.width,
                                                 child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: <Widget>[
+
                                                       //DATA*******************************
                                                       Transform.translate(
                                                         offset: Offset(85, 0),
@@ -157,30 +153,6 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
                                                             tam: 12, negrito: true,),
                                                         ),
                                                       ),
-
-                                                      //LIXEIRA
-                                                      Row(
-                                                          mainAxisAlignment: MainAxisAlignment.end,
-                                                          children: <Widget>[
-                                                            //LIXEIRA ***********************
-                                                            IconButton(
-                                                                icon: Icon(Icons.delete_outline),
-                                                                onPressed: () {
-                                                                  excluir('1');
-                                                                },
-                                                              ),
-
-                                                            Padding(
-                                                                padding: EdgeInsets.only(top: 0, bottom: 0, left: 0, right: 10),
-                                                                child:IconButton(
-                                                                  icon: Icon(Icons.message_outlined,color: Utils.corApp,),
-                                                                  onPressed: () {
-                                                                    excluir('1');
-                                                                    },
-                                                                )
-                                                            ),
-                                                          ]
-                                                      ),
                                                     ]
                                                 ),
                                               ),
@@ -188,16 +160,10 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
 
                                             //DESCRIÇÃO
                                             Transform.translate(
-                                              offset: Offset(15, -40),
+                                              offset: Offset(15, -10),
                                               child: Padding(
-                                                padding: EdgeInsets.only(top: 0,
-                                                    bottom: 00,
-                                                    left: 00,
-                                                    right: 30),
-                                                child: Texto(
-                                                  tit: ds['descricao'],
-                                                  linhas: null,
-                                                  cor: Colors.grey,),
+                                                padding: EdgeInsets.only(top: 0, bottom: 00, left: 00, right: 30),
+                                                child: Texto(tit: ds['descricao'], linhas: null, cor: Colors.grey,),
                                               ),
                                             ),
                                           ]
@@ -207,21 +173,17 @@ class MinhasDoacoesState extends State<DoacoesSolicitadas> {
                                 ),
                               ]
                           );
-                        }else
+                        }else{
                           return Container();
+                        }
                       }
-                      );
-                  },
+                  );
+                },
               ),
             ),
           ],
         )
     );
-  }
-
-  excluir(String id)async{
-    bool v=await Utils.showDlg('atencao'.tr,'del_confirm'.tr,context);
-    print(v);
   }
 
 }

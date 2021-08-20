@@ -10,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:doaruser/widget/texto.dart';
-import 'package:get_storage/get_storage.dart';
 
 class MinhasDoacoes extends StatefulWidget {
   @override
@@ -20,18 +19,13 @@ class MinhasDoacoes extends StatefulWidget {
 class MinhasDoacoesState extends State<MinhasDoacoes> {
   dynamic dataList;
   dynamic lista,iconeSeta=Icons.keyboard_arrow_down,corData;
-  static final datacount = GetStorage();
-  var userId;
+  var user;
   bool mostra=false,lixeiraVisivel=true;
   String doadoPara='';
-  static final cidade=datacount.read('cidade');
   var vazio='https://firebasestorage.googleapis.com/v0/b/beleza-b3e97.appspot.com/o/DOC%2FNE8etfleO61F2teGzimR.jpeg?alt=media&token=9ce1035e-777e-4f1c-b7ea-fc9f7512164b';
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    var foneUser=datacount.read('foneUser');
-    datacount.write('foneUser',foneUser);
-    datacount.write('local','OK');
-    Get.offAll(() => AdmPedidos(), arguments: {'foneUser':foneUser,'cidade':cidade,'local':'OK'});
+    Get.offAll(() => AdmPedidos(), arguments: {});
     return true;
   }
 
@@ -42,14 +36,21 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
   }
 
   Future<dynamic> getAnuncios() async {
-    dataList =datacount.read('anuncios');
+    dataList =await Utils.datacount.read('anuncios');
+    setState(() {});
+  }
+
+  inicia()async {
+    user =  await Utils.getUserData();
+    setState(() {
+      getAnuncios();
+    });
   }
 
   @override
   void initState() {
+    inicia();
     BackButtonInterceptor.add(myInterceptor);
-    userId=datacount.read('idUser');
-    getAnuncios();
     super.initState();
   }
 
@@ -92,7 +93,7 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                           corData=Colors.red;
                         }
 
-                        if(ds['userId']==userId) {
+                        if(ds['userId']==user.id) {
                           return Column(
                               children: <Widget>[
                                 Padding(
@@ -115,48 +116,28 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                                             Transform.translate(
                                               offset: Offset(5, 0),
                                               child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment
-                                                      .start,
+                                                  mainAxisAlignment: MainAxisAlignment.start,
                                                   children: <Widget>[
                                                     //IMAGEM*************************************
                                                     Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 10,
-                                                          bottom: 0,
-                                                          left: 5,
-                                                          right: 0),
+                                                      padding: EdgeInsets.only(top: 10, bottom: 0, left: 5, right: 0),
                                                       child: Container(
                                                         width: 85,
                                                         height: 85,
                                                         decoration: BoxDecoration(
                                                             image: DecorationImage(
-                                                              image: ds['img'] ==
-                                                                  ''
-                                                                  ? NetworkImage(
-                                                                  vazio)
-                                                                  : NetworkImage(
-                                                                  ds['img']),
+                                                              image: ds['img'] == '' ? NetworkImage(vazio) : NetworkImage(ds['img']),
                                                               fit: BoxFit.fill,
                                                             ),
-
-                                                            borderRadius: BorderRadius
-                                                                .all(
-                                                                Radius.circular(
-                                                                    40))
+                                                            borderRadius: BorderRadius.all(Radius.circular(40))
                                                         ),
                                                       ),
                                                     ),
-                                                    //TÍTULO ***********************************
 
+                                                    //TÍTULO ***********************************
                                                     Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 0,
-                                                          bottom: 10,
-                                                          left: 08,
-                                                          right: 0),
-                                                      child: Texto(
-                                                          tit: ds["titulo"],
-                                                          tam: 16.0),
+                                                      padding: EdgeInsets.only(top: 0, bottom: 10, left: 08, right: 0),
+                                                      child: Texto(tit: ds["titulo"], tam: 16.0),
                                                     ),
                                                   ]
                                               ),
@@ -166,13 +147,9 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                                             Transform.translate(
                                               offset: Offset(18, -60),
                                               child: Container(
-                                                width: MediaQuery
-                                                    .of(context)
-                                                    .size
-                                                    .width,
+                                                width: MediaQuery.of(context).size.width,
                                                 child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment
-                                                        .spaceBetween,
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: <Widget>[
 
                                                       //DATA*******************************
@@ -180,35 +157,24 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                                                         offset: Offset(85, 0),
                                                         child: Container(
                                                           child: Texto(
-                                                            tit: DateFormat(
-                                                                'dd/MM/yy hh:mm')
-                                                                .format(
-                                                                dateTime) +
-                                                                ' ' + doadoPara,
-                                                            tam: 12,
-                                                            negrito: true,
-                                                            cor: corData,),
+                                                            tit: DateFormat('dd/MM/yy hh:mm').format(dateTime) + ' ' + doadoPara,
+                                                            tam: 12, negrito: true, cor: corData,),
                                                         ),
                                                       ),
 
                                                       //LIXEIRA E SETINHA
                                                       Row(
-                                                          mainAxisAlignment: MainAxisAlignment
-                                                              .end,
+                                                          mainAxisAlignment: MainAxisAlignment.end,
                                                           children: <Widget>[
                                                             //LIXEIRA ***********************
                                                             Container(
                                                               width: 30,
-                                                              //color:Colors.blue,
                                                               child: Visibility(
                                                                 visible: lixeiraVisivel,
                                                                 child: IconButton(
-                                                                  icon: Icon(
-                                                                      Icons
-                                                                          .delete_outline),
+                                                                  icon: Icon(Icons.delete_outline),
                                                                   onPressed: () {
-                                                                    excluir(
-                                                                        '1');
+                                                                    excluir('1');
                                                                   },
                                                                 ),
                                                               ),
@@ -216,35 +182,19 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
 
                                                             //SETA *************************
                                                             Padding(
-                                                              padding: EdgeInsets
-                                                                  .only(top: 0,
-                                                                  bottom: 0,
-                                                                  left: 0,
-                                                                  right: 27),
+                                                              padding: EdgeInsets.only(top: 0, bottom: 0, left: 0, right: 27),
                                                               child: Container(
                                                                 width: 30,
-                                                                //color:Colors.green,
                                                                 child: IconButton(
-                                                                  icon: Icon(
-                                                                    iconeSeta,
-                                                                    color: Utils
-                                                                        .corApp,),
+                                                                  icon: Icon(iconeSeta, color: Utils.corApp,),
                                                                   onPressed: () {
                                                                     setState(() {
-                                                                      if (iconeSeta ==
-                                                                          Icons
-                                                                              .keyboard_arrow_down) {
-                                                                        iconeSeta =
-                                                                            Icons
-                                                                                .keyboard_arrow_up;
-                                                                        mostra =
-                                                                        true;
+                                                                      if (iconeSeta == Icons.keyboard_arrow_down) {
+                                                                        iconeSeta = Icons.keyboard_arrow_up;
+                                                                        mostra = true;
                                                                       } else {
-                                                                        iconeSeta =
-                                                                            Icons
-                                                                                .keyboard_arrow_down;
-                                                                        mostra =
-                                                                        false;
+                                                                        iconeSeta = Icons.keyboard_arrow_down;
+                                                                        mostra = false;
                                                                       }
                                                                     });
                                                                   },
@@ -262,22 +212,13 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                                             Transform.translate(
                                               offset: Offset(15, -40),
                                               child: Padding(
-                                                padding: EdgeInsets.only(top: 0,
-                                                    bottom: 00,
-                                                    left: 00,
-                                                    right: 30),
-                                                child: Texto(
-                                                  tit: ds['descricao'],
-                                                  linhas: null,
-                                                  cor: Colors.grey,),
+                                                padding: EdgeInsets.only(top: 0, bottom: 00, left: 00, right: 30),
+                                                child: Texto(tit: ds['descricao'], linhas: null, cor: Colors.grey,),
                                               ),
                                             ),
                                             //SOLICITANTES
                                             Padding(
-                                                padding: EdgeInsets.only(top: 0,
-                                                    bottom: 5,
-                                                    left: 3,
-                                                    right: 3),
+                                                padding: EdgeInsets.only(top: 0, bottom: 5, left: 3, right: 3),
                                                 child: Visibility(
                                                   visible: mostra,
                                                   child: ds['doadoPara'] != '' ?
@@ -286,108 +227,40 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                                                       stream: lista,
                                                       builder: (
                                                           BuildContext context,
-                                                          AsyncSnapshot<
-                                                              dynamic> snapshot) {
+                                                          AsyncSnapshot<dynamic> snapshot) {
                                                         if (!snapshot.hasData) {
-                                                          return SemRegistro(
-                                                              tit: ' ');
+                                                          return SemRegistro(tit: ' ');
                                                         }
                                                         if (snapshot != null) {
-                                                          return ListView
-                                                              .builder(
+                                                          return ListView.builder(
                                                               shrinkWrap: true,
-                                                              itemCount: snapshot
-                                                                  .data.docs
-                                                                  .length,
-                                                              itemBuilder: (
-                                                                  context,
-                                                                  index) {
-                                                                DocumentSnapshot det = snapshot
-                                                                    .data
-                                                                    .docs[index];
-                                                                DateTime dtCriado = det["dtCriado"]
-                                                                    .toDate();
+                                                              itemCount: snapshot.data.docs.length,
+                                                              itemBuilder: (context, index) {
+                                                                DocumentSnapshot det = snapshot.data.docs[index];
+                                                                DateTime dtCriado = det["dtCriado"].toDate();
 
                                                                 return Card(
                                                                   shape: RoundedRectangleBorder(
-                                                                    borderRadius: BorderRadius
-                                                                        .circular(
-                                                                        10.0),
-                                                                    side: BorderSide(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1.0,
-                                                                    ),
+                                                                    borderRadius: BorderRadius.circular(10.0),
+                                                                    side: BorderSide(color: Colors.grey, width: 1.0,),
                                                                   ),
                                                                   child: Column(
                                                                       children: <
                                                                           Widget>[
                                                                         Row(
-                                                                            mainAxisAlignment: MainAxisAlignment
-                                                                                .spaceBetween,
-                                                                            children: <
-                                                                                Widget>[
-
+                                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                            children: <Widget>[
                                                                               //DATA**************************
                                                                               Padding(
-                                                                                padding: EdgeInsets
-                                                                                    .only(
-                                                                                    top: 0,
-                                                                                    bottom: 0,
-                                                                                    left: 5,
-                                                                                    right: 0),
+                                                                                padding: EdgeInsets.only(top: 0, bottom: 0, left: 5, right: 0),
                                                                                 child: Texto(
-                                                                                    tit: DateFormat(
-                                                                                        'dd/MM/yy HH:mm')
-                                                                                        .format(
-                                                                                        dtCriado),
-                                                                                    negrito: true,
-                                                                                    tam: 12),
+                                                                                    tit: DateFormat('dd/MM/yy HH:mm').format(dtCriado), negrito: true, tam: 12),
                                                                               ),
 
                                                                               //TELEFONE
                                                                               Padding(
-                                                                                padding: EdgeInsets
-                                                                                    .only(
-                                                                                    top: 0,
-                                                                                    bottom: 0,
-                                                                                    left: 0,
-                                                                                    right: 0),
-                                                                                child: Texto(
-                                                                                  tit: det['fone'],
-                                                                                  negrito: true,
-                                                                                  cor: Colors
-                                                                                      .grey,
-                                                                                  tam: 14,),
-                                                                              ),
-
-                                                                              //BOTÃO PARA DOAR
-                                                                              TextButton
-                                                                                  .icon(
-                                                                                style: Utils
-                                                                                    .TextButtoniconStyle(
-                                                                                    5),
-                                                                                icon: Icon(
-                                                                                  Icons
-                                                                                      .volunteer_activism,
-                                                                                  color: Colors
-                                                                                      .red,),
-                                                                                // Your icon here
-                                                                                label: Texto(
-                                                                                  tit: 'doar'
-                                                                                      .tr,
-                                                                                  cor: Colors
-                                                                                      .red,
-                                                                                  negrito: true,),
-                                                                                // Your text here
-                                                                                onPressed: () {
-                                                                                  doar(
-                                                                                      ds
-                                                                                          .id,
-                                                                                      det
-                                                                                          .id,
-                                                                                      det['fone']);
-                                                                                },
+                                                                                padding: EdgeInsets.only(top: 0, bottom: 0, left: 0, right: 0),
+                                                                                child: Texto(tit: det['fone'], negrito: true, cor: Colors.grey, tam: 14,),
                                                                               ),
                                                                             ]
                                                                         ),
@@ -403,8 +276,7 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                                                   ) :
                                                   Card(
                                                     shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10.0),
+                                                      borderRadius: BorderRadius.circular(10.0),
                                                       side: BorderSide(
                                                         color: Colors.grey,
                                                         width: 1.0,
@@ -413,42 +285,18 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
                                                     child: Column(
                                                         children: <Widget>[
                                                           Row(
-                                                              mainAxisAlignment: MainAxisAlignment
-                                                                  .spaceBetween,
-                                                              children: <
-                                                                  Widget>[
-
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: <Widget>[
                                                                 Padding(
-                                                                  padding: EdgeInsets
-                                                                      .only(
-                                                                      top: 10,
-                                                                      bottom: 10,
-                                                                      left: 10,
-                                                                      right: 0),
+                                                                  padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 0),
                                                                   child: Texto(
-                                                                    tit: 'doacao_para'
-                                                                        .tr +
-                                                                        ds['doadoPara'],
-                                                                    negrito: true,
-                                                                    cor: Colors
-                                                                        .red,
-                                                                    tam: 16,),
+                                                                    tit: 'doacao_para'.tr + ds['doadoPara'], negrito: true, cor: Colors.red, tam: 16,),
                                                                 ),
                                                                 //DATA**************************
                                                                 Padding(
-                                                                  padding: EdgeInsets
-                                                                      .only(
-                                                                      top: 0,
-                                                                      bottom: 0,
-                                                                      left: 0,
-                                                                      right: 10),
+                                                                  padding: EdgeInsets.only(top: 0, bottom: 0, left: 0, right: 10),
                                                                   child: Texto(
-                                                                      tit: DateFormat(
-                                                                          'dd/MM/yy HH:mm')
-                                                                          .format(
-                                                                          dtAlterado),
-                                                                      negrito: true,
-                                                                      tam: 12),
+                                                                      tit: DateFormat('dd/MM/yy HH:mm').format(dtAlterado), negrito: true, tam: 12),
                                                                 ),
                                                               ]
                                                           ),
@@ -482,13 +330,6 @@ class MinhasDoacoesState extends State<MinhasDoacoes> {
     .where('status', isEqualTo: 'A').snapshots();
   }
 
-  doar(String idDoacao,String idItem,String doarPara)async{
-    bool doar=await Utils.showDlg('atencao'.tr,'doacao_msg'.tr,context);
-    if(doar){
-      await Dados.databaseReference.collection('anuncio').doc(
-          idDoacao).update({'status': 'D', 'doadoPara':doarPara,'dtAlterado': FieldValue.serverTimestamp()});
-    }
-  }
   excluir(String id)async{
     bool v=await Utils.showDlg('atencao'.tr,'del_confirm'.tr,context);
   }

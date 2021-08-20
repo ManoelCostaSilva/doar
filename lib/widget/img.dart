@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 
 class Img extends StatefulWidget {
   var tit;
-  double? tam;
+  double? radio,largura,altura;
   Color? cor;
 
   Img({
     this.tit,
-    this.tam,
+    this.radio,
     this.cor,
+    this.largura,
+    this.altura,
   });
 
   @override
@@ -34,11 +36,12 @@ class _ImgState extends State<Img> with SingleTickerProviderStateMixin {
       child: ClipOval(
         child: Image.network(
             widget.tit==''?vazio:widget.tit,
-            width: widget.tam==null?50:widget.tam,
+            width: widget.largura==null?50:widget.largura,
+            height: widget.altura==null?50:widget.altura,
             fit: BoxFit.fill
         ),
       ),
-      radius: widget.tam==null?50:widget.tam,
+      radius: widget.radio==null?50:widget.radio,
     );
   }
 }

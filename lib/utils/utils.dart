@@ -57,6 +57,27 @@ class Utils {
     return user![0];
   }
 
+  static setAnunciosData(var user) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String encodedData = UserStruc.encode([
+      UserStruc(cidadeId: user['cidadeId'], cidadeNome: user['cidadeNome'],
+          ufId:user['ufId'] ,ufNome: user['ufNome'], fone:user['fone'],
+          img:user['img'],nome:user['nome'],status:user['status'], termo:user['termo'],
+          id: user.id ),
+    ]);
+    await prefs.setString('user', encodedData);
+  }
+
+  static  getAnunciosData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? users = await prefs.getString('user');
+    if(users==null){
+      return null;
+    }
+    final List<UserStruc>? user = UserStruc.decode(users!);
+    return user![0];
+  }
+
   PhoneVerificationFailed verificationFailed =
       (FirebaseAuthException authException) {
   };

@@ -20,7 +20,6 @@ class UserAnuncio extends StatefulWidget {
 
 class _UserAnuncioState extends State<UserAnuncio> {
   static final datacount = GetStorage();
-  //static final foneUser=datacount.read('foneUser');
   var titulo = TextEditingController();
   var descricao = TextEditingController();
   var div = TextEditingController();
@@ -28,12 +27,8 @@ class _UserAnuncioState extends State<UserAnuncio> {
   var url,idCat,anuncio,user;
   String categoriaEscolhida='Categorias';
   bool mostraCircular=false,priVez=false;
-  //static final idUser=datacount.read('idUser');
-  //static final cidade=datacount.read('cidade');
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    //datacount.write('foneUser',foneUser);
-    //datacount.write('local','OK');
     Get.offAll(() => AdmPedidos(), arguments: {});
     return true;
   }
@@ -47,19 +42,14 @@ class _UserAnuncioState extends State<UserAnuncio> {
   inicia()async {
     user =  await Utils.getUserData();
     if (user!.ufId != null) {
-     // setState(() {
         //ufEscolhida = user.ufNome;
-        //cidadeEscolhida = user.cidadeNome;
-        //ufID = user.ufId;
-        //cidadeId = user.cidadeId;
-        //nome.text=user.nome==null?'':user.nome;
-      //});
     }
   }
 
   @override
   void initState() {
     super.initState();
+    inicia();
     BackButtonInterceptor.add(myInterceptor);
     Dados.campos.clear();
     priVez =Get.arguments['primeiraVez'] ?? null;
@@ -104,6 +94,7 @@ class _UserAnuncioState extends State<UserAnuncio> {
                 child: Column(
                  // mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
+                    SizedBox(height : 10.0),
                     MkBoxDecoration(image:_image,url:url,carregaImg: true,),
                     Texto(tit:'Pressine o ícone acima para trocar a imagem',tam: 14,cor:Colors.grey),
                     SizedBox(height : 10.0),

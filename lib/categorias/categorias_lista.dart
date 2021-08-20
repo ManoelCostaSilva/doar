@@ -69,7 +69,7 @@ class _CategoriasListaState extends State<CategoriasLista> with AutomaticKeepAli
                                   dense:true,
                                   //                                  le   to   ri   bo
                                   contentPadding: EdgeInsets.fromLTRB(1.0, 5.0, 1.0, 5.0),
-                                  leading: Img(tit:ds['img']==''?url:ds['img'],tam: 50,),
+                                  leading: Img(tit:ds['img']==''?url:ds['img'],radio: 50,),
                                   title: Texto(tit:ds["nome"],tam:15.0),
                                   // MENU *******************************
                                   trailing: new Column(

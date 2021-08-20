@@ -4,6 +4,7 @@ import 'package:doaruser/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:doaruser/widget/barra_status.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'empresa_settings_itens.dart';
 
 class EmpresaSettings extends StatefulWidget {
@@ -14,12 +15,13 @@ class EmpresaSettings extends StatefulWidget {
 class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliveClientMixin<EmpresaSettings> {
   var user;
   static var userNome='';
+  var anuncios;
+  static final datacount = GetStorage();
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
     Get.offAll(() => AdmPedidos(), arguments: {});
     return true;
   }
-
 
   @override
   void dispose() {
@@ -29,9 +31,13 @@ class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliv
 
   inicia()async {
     user =  await Utils.getUserData();
+    anuncios=Get.arguments['anuncios'] ?? null;
+    datacount.write('anuncios',anuncios);
     if (user!.nome != null) {
       setState(() {
         userNome=user.nome;
+        print('11111111111111111111111111');
+        anuncios;
       });
     }
   }
@@ -45,7 +51,6 @@ class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: BarraStatus(tit:'Olá '+Obx(() => Text("$userNome"))),
       appBar: BarraStatus(tit:'Olá '+userNome),
       body: ListView(
         padding: EdgeInsets.all(10.0),
@@ -102,13 +107,10 @@ class EmpresaSettingsState extends State<EmpresaSettings> with AutomaticKeepAliv
                     child: Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                          color: Colors.grey,
-                          width: 1.0,
-                        ),
+                        side: BorderSide(color: Colors.grey, width: 1.0,),
                       ),
                       child: BtnLista(tit:'doacao_solicitada'.tr,destino: 'doacoes_solicitadas',tam: 16,ID: '1',
-                          icon:Icons.volunteer_activism, iconCor: Utils.corApp,
+                          icon:Icons.volunteer_activism, iconCor: Utils.corApp,anuncios: anuncios,
                           TB:'anuncio'),
                     ),
                   ),

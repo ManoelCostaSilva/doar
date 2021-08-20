@@ -109,9 +109,9 @@ class Dados {
     Map<String,String> toGravar={};
 
     for (var x = 0; x < campos.length; x++) {
-      if (campos[x].valor !='') {
+      //if (campos[x].valor !='') {
         toGravar[campos[x].campo]=campos[x].valor;
-      }
+     // }
     }
     //GRAVA OS DADOS OPCIONAIS
     DocumentReference ref;

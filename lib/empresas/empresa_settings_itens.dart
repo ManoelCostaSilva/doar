@@ -5,10 +5,10 @@ import 'package:doaruser/widget/texto.dart';
 import 'package:get_storage/get_storage.dart';
 
 class BtnLista extends StatefulWidget {
-  var tit,destino,ID,dados,TB;
+  var tit,destino,ID,TB;
   double? tam;
   Color? cor,iconCor;
-  dynamic? icon;
+  dynamic? icon,anuncios;
 
   BtnLista({
     this.tit,
@@ -18,7 +18,7 @@ class BtnLista extends StatefulWidget {
     this.ID,
     this.icon,
     this.iconCor,
-    this.dados,
+    this.anuncios,
     this.TB,
   });
 
@@ -29,10 +29,14 @@ class BtnLista extends StatefulWidget {
 class _BtnListaState extends State<BtnLista> with SingleTickerProviderStateMixin {
   static final datacount = GetStorage();
   var userId;
+  dynamic anuncios;
 
   @override
   void initState() {
     userId=datacount.read('idUser');
+    anuncios=datacount.read('anuncios');
+    print('MANOEL');
+    print(anuncios);
     super.initState();
   }
 
@@ -45,7 +49,7 @@ class _BtnListaState extends State<BtnLista> with SingleTickerProviderStateMixin
       padding: EdgeInsets.only(top: 0,left:3,right: 3),
         child:InkWell(
           onTap: () {
-            Get.toNamed(widget.destino,arguments: {'id': widget.ID,'dados':widget.dados});
+            Get.toNamed(widget.destino,arguments: {'id': widget.ID,'dados':widget.anuncios});
           },
           child:Column(
               children: <Widget>[
@@ -54,17 +58,13 @@ class _BtnListaState extends State<BtnLista> with SingleTickerProviderStateMixin
                   onPressed: () {
                     if(widget.destino=='minhas_doacoes'){
                       try{
-                        Get.toNamed(widget.destino,arguments: {'TB': widget.TB,'dados':widget.dados,
-                          'tit':widget.tit});
+                        Get.toNamed(widget.destino,arguments: {'TB': widget.TB,'dados':widget.anuncios, 'tit':widget.tit});
                       } catch (e) {
                         Get.to(() => LoginPage(), arguments: {'tipo':'minhas_doacoes'});
                       }
-
                     }else{
-                      Get.toNamed(widget.destino,arguments: {'TB': widget.TB,'dados':widget.dados,
-                        'tit':widget.tit});
+                      Get.toNamed(widget.destino,arguments: {'TB': widget.TB,'anuncios':widget.anuncios, 'tit':widget.tit});
                     }
-
                   },
                 ),
                 Texto(tit:widget.tit,tam: widget.tam,cor:Colors.black,linhas: 2,),
